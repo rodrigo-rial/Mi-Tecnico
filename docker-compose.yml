@@ -25,5 +25,27 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build:
+      context: ./backend
+
+    container_name: mitecnico_backend
+    restart: unless-stopped
+
+    command: python manage.py runserver 0.0.0.0:8000
+
+    volumes:
+      - ./backend:/app
+
+    ports:
+      - "${DJANGO_PORT}:8000"
+
+    env_file:
+      - .env
+
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   postgres_data:
