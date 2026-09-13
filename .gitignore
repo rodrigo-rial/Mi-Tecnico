@@ -1,8 +1,25 @@
+# Variables de entorno
 .env
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.venv/
 venv/
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+
+# React
 node_modules/
 dist/
-build/
-*.sqlite3
+
+# Editores
+.vscode/
+.idea/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
