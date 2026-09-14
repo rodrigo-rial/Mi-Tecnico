@@ -28,10 +28,8 @@ services:
   backend:
     build:
       context: ./backend
-
     container_name: mitecnico_backend
     restart: unless-stopped
-
     command: python manage.py runserver 0.0.0.0:8000
 
     volumes:
@@ -46,6 +44,23 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: mitecnico_frontend
+    restart: unless-stopped
+    command: npm run dev -- --host 0.0.0.0
+
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+    ports:
+      - "${FRONTEND_PORT}:5173"
+
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
