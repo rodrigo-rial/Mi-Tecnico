@@ -1,5 +1,9 @@
 # Primera entrega: Técnicos
 
+> Documento histórico de planificación. La implementación actual y su contrato
+> se describen en `docs/tecnicos-api.md`. No usar este archivo para determinar
+> el estado actual del módulo.
+
 Estado: estructura preparada; propuesta pendiente de coordinación. La app todavía
 no está registrada en INSTALLED_APPS y no contiene modelos ni migraciones.
 Rama de trabajo: feature/tecnicos-base.

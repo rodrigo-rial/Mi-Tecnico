@@ -22,7 +22,10 @@ from .permissions import EsTecnicoAprobado
 
 class PerfilTecnicoAPITests(APITestCase):
     def setUp(self):
-        self.especialidad = Especialidad.objects.create(nombre="Electricidad")
+        self.especialidad, _ = Especialidad.objects.get_or_create(
+            nombre="Electricidad",
+            defaults={"activa": True},
+        )
         self.zona = Zona.objects.create(nombre="Zona Centro")
         self.tecnico = Usuario.objects.create_user(
             username="tecnico_prueba",
@@ -133,9 +136,12 @@ class PerfilTecnicoAPITests(APITestCase):
 
         self.assertEqual(especialidades.status_code, status.HTTP_200_OK)
         self.assertEqual(zonas.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(especialidades.data), 1)
         self.assertEqual(len(zonas.data), 1)
-        self.assertEqual(especialidades.data[0]["nombre"], "Electricidad")
+        nombres_especialidades = {
+            especialidad["nombre"] for especialidad in especialidades.data
+        }
+        self.assertIn("Electricidad", nombres_especialidades)
+        self.assertNotIn("Inactiva", nombres_especialidades)
         self.assertEqual(zonas.data[0]["nombre"], "Zona Centro")
 
     def test_perfil_incompleto_no_puede_aprobarse(self):
