@@ -264,3 +264,46 @@ class PerfilTecnicoAPITests(APITestCase):
                     self.perfil.estado_validacion,
                     PerfilTecnico.EstadoValidacion.PENDIENTE,
                 )
+
+    def test_usuario_comun_no_puede_descargar_documento_desde_admin(self):
+        self.client.force_login(self.cliente)
+        url = reverse(
+            "admin:tecnicos_perfiltecnico_descargar_documento",
+            args=(self.perfil.pk, "dni"),
+        )
+
+        respuesta = self.client.get(url)
+
+        self.assertEqual(respuesta.status_code, status.HTTP_302_FOUND)
+        self.assertIn("/admin/login/", respuesta.url)
+
+    def test_superusuario_puede_descargar_documento_desde_admin(self):
+        administrador = Usuario.objects.create_superuser(
+            username="administrador_prueba",
+            email="administrador@prueba.com",
+            password="clave-segura-123",
+        )
+        self.client.force_login(administrador)
+
+        with tempfile.TemporaryDirectory() as directorio_media:
+            with override_settings(MEDIA_ROOT=directorio_media):
+                self.perfil.documento_dni = SimpleUploadedFile(
+                    "dni.pdf",
+                    b"%PDF-1.4 documento de prueba",
+                    content_type="application/pdf",
+                )
+                self.perfil.save()
+                url = reverse(
+                    "admin:tecnicos_perfiltecnico_descargar_documento",
+                    args=(self.perfil.pk, "dni"),
+                )
+
+                respuesta = self.client.get(url)
+                contenido = b"".join(respuesta.streaming_content)
+
+                self.assertEqual(respuesta.status_code, status.HTTP_200_OK)
+                self.assertEqual(contenido, b"%PDF-1.4 documento de prueba")
+                self.assertIn(
+                    "attachment",
+                    respuesta.headers["Content-Disposition"],
+                )
