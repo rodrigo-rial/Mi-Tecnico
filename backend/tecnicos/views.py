@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,6 +9,7 @@ from usuarios.permissions import EsTecnico
 
 from .models import Especialidad, PerfilTecnico, Zona
 from .serializers import (
+    DocumentacionTecnicoSerializer,
     EspecialidadSerializer,
     PerfilTecnicoSerializer,
     ZonaSerializer,
@@ -52,6 +54,30 @@ class PerfilTecnicoView(APIView):
     def patch(self, request):
         perfil = self.get_perfil(request.user)
         serializer = PerfilTecnicoSerializer(
+            perfil,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class DocumentacionTecnicoView(APIView):
+    permission_classes = [EsTecnico]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_perfil(self, usuario):
+        return get_object_or_404(PerfilTecnico, usuario=usuario)
+
+    def get(self, request):
+        perfil = self.get_perfil(request.user)
+        serializer = DocumentacionTecnicoSerializer(perfil)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        perfil = self.get_perfil(request.user)
+        serializer = DocumentacionTecnicoSerializer(
             perfil,
             data=request.data,
             partial=True,

@@ -1,6 +1,11 @@
 from django.urls import path
 
-from .views import EspecialidadListView, PerfilTecnicoView, ZonaListView
+from .views import (
+    DocumentacionTecnicoView,
+    EspecialidadListView,
+    PerfilTecnicoView,
+    ZonaListView,
+)
 
 
 urlpatterns = [
@@ -11,4 +16,9 @@ urlpatterns = [
     ),
     path("zonas/", ZonaListView.as_view(), name="zona_lista"),
     path("perfil/", PerfilTecnicoView.as_view(), name="perfil_tecnico"),
+    path(
+        "documentacion/",
+        DocumentacionTecnicoView.as_view(),
+        name="documentacion_tecnico",
+    ),
 ]

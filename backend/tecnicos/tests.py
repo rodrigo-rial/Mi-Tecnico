@@ -1,7 +1,9 @@
+import tempfile
 from types import SimpleNamespace
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -183,3 +185,82 @@ class PerfilTecnicoAPITests(APITestCase):
 
         with self.assertRaises(ValidationError):
             validar_tamano_documento(archivo)
+
+    def test_tecnico_puede_cargar_su_documentacion(self):
+        self.client.force_authenticate(user=self.tecnico)
+
+        with tempfile.TemporaryDirectory() as directorio_media:
+            with override_settings(MEDIA_ROOT=directorio_media):
+                respuesta = self.client.patch(
+                    reverse("documentacion_tecnico"),
+                    {
+                        "dni_numero": "12345678",
+                        "matricula_numero": "MAT-123",
+                        "documento_dni": SimpleUploadedFile(
+                            "dni.pdf",
+                            b"%PDF-1.4 documento de prueba",
+                            content_type="application/pdf",
+                        ),
+                        "documento_matricula": SimpleUploadedFile(
+                            "matricula.pdf",
+                            b"%PDF-1.4 documento de prueba",
+                            content_type="application/pdf",
+                        ),
+                    },
+                    format="multipart",
+                )
+
+                self.perfil.refresh_from_db()
+                self.assertEqual(respuesta.status_code, status.HTTP_200_OK)
+                self.assertEqual(self.perfil.dni_numero, "12345678")
+                self.assertEqual(self.perfil.matricula_numero, "MAT-123")
+                self.assertTrue(respuesta.data["tiene_documento_dni"])
+                self.assertTrue(respuesta.data["tiene_documento_matricula"])
+                self.assertNotIn("documento_dni", respuesta.data)
+                self.assertNotIn("documento_matricula", respuesta.data)
+
+    def test_cliente_no_puede_cargar_documentacion_tecnica(self):
+        self.client.force_authenticate(user=self.cliente)
+
+        respuesta = self.client.patch(
+            reverse("documentacion_tecnico"),
+            {"dni_numero": "12345678"},
+            format="json",
+        )
+
+        self.assertEqual(respuesta.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_cambiar_documentacion_reinicia_validacion(self):
+        self.client.force_authenticate(user=self.tecnico)
+
+        with tempfile.TemporaryDirectory() as directorio_media:
+            with override_settings(MEDIA_ROOT=directorio_media):
+                self.perfil.dni_numero = "12345678"
+                self.perfil.matricula_numero = "MAT-123"
+                self.perfil.documento_dni = SimpleUploadedFile(
+                    "dni.pdf",
+                    b"%PDF-1.4 documento de prueba",
+                    content_type="application/pdf",
+                )
+                self.perfil.documento_matricula = SimpleUploadedFile(
+                    "matricula.pdf",
+                    b"%PDF-1.4 documento de prueba",
+                    content_type="application/pdf",
+                )
+                self.perfil.estado_validacion = (
+                    PerfilTecnico.EstadoValidacion.APROBADO
+                )
+                self.perfil.save()
+
+                respuesta = self.client.patch(
+                    reverse("documentacion_tecnico"),
+                    {"matricula_numero": "MAT-456"},
+                    format="json",
+                )
+
+                self.perfil.refresh_from_db()
+                self.assertEqual(respuesta.status_code, status.HTTP_200_OK)
+                self.assertEqual(
+                    self.perfil.estado_validacion,
+                    PerfilTecnico.EstadoValidacion.PENDIENTE,
+                )
