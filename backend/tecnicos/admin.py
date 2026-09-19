@@ -19,8 +19,17 @@ class ZonaAdmin(admin.ModelAdmin):
 
 @admin.register(PerfilTecnico)
 class PerfilTecnicoAdmin(admin.ModelAdmin):
-    list_display = ("usuario", "estado_validacion", "actualizado_en")
+    list_display = (
+        "usuario",
+        "estado_validacion",
+        "tiene_documentacion_completa",
+        "actualizado_en",
+    )
     list_filter = ("estado_validacion", "especialidades", "zonas")
     search_fields = ("usuario__username", "usuario__email")
     filter_horizontal = ("especialidades", "zonas")
     readonly_fields = ("creado_en", "actualizado_en")
+
+    @admin.display(boolean=True, description="Documentación completa")
+    def tiene_documentacion_completa(self, perfil):
+        return perfil.documentacion_completa
