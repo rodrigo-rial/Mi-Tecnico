@@ -17,6 +17,7 @@ from .models import (
     Zona,
     validar_tamano_documento,
 )
+from .permissions import EsTecnicoAprobado
 
 
 class PerfilTecnicoAPITests(APITestCase):
@@ -307,3 +308,54 @@ class PerfilTecnicoAPITests(APITestCase):
                     "attachment",
                     respuesta.headers["Content-Disposition"],
                 )
+
+    def test_tecnico_pendiente_o_rechazado_no_esta_aprobado(self):
+        permiso = EsTecnicoAprobado()
+        request = SimpleNamespace(user=self.tecnico)
+
+        self.assertFalse(permiso.has_permission(request, None))
+
+        self.perfil.estado_validacion = (
+            PerfilTecnico.EstadoValidacion.RECHAZADO
+        )
+        self.perfil.save()
+        self.assertFalse(permiso.has_permission(request, None))
+
+    def test_cliente_y_tecnico_sin_perfil_no_estan_aprobados(self):
+        permiso = EsTecnicoAprobado()
+        request_cliente = SimpleNamespace(user=self.cliente)
+        tecnico_sin_perfil = Usuario.objects.create_user(
+            username="tecnico_sin_perfil",
+            email="sinperfil@prueba.com",
+            password="clave-segura-123",
+            rol=Usuario.Rol.TECNICO,
+        )
+        request_sin_perfil = SimpleNamespace(user=tecnico_sin_perfil)
+
+        self.assertFalse(permiso.has_permission(request_cliente, None))
+        self.assertFalse(permiso.has_permission(request_sin_perfil, None))
+
+    def test_tecnico_aprobado_supera_el_permiso(self):
+        permiso = EsTecnicoAprobado()
+        request = SimpleNamespace(user=self.tecnico)
+
+        with tempfile.TemporaryDirectory() as directorio_media:
+            with override_settings(MEDIA_ROOT=directorio_media):
+                self.perfil.dni_numero = "12345678"
+                self.perfil.matricula_numero = "MAT-123"
+                self.perfil.documento_dni = SimpleUploadedFile(
+                    "dni.pdf",
+                    b"%PDF-1.4 documento de prueba",
+                    content_type="application/pdf",
+                )
+                self.perfil.documento_matricula = SimpleUploadedFile(
+                    "matricula.pdf",
+                    b"%PDF-1.4 documento de prueba",
+                    content_type="application/pdf",
+                )
+                self.perfil.estado_validacion = (
+                    PerfilTecnico.EstadoValidacion.APROBADO
+                )
+                self.perfil.save()
+
+                self.assertTrue(permiso.has_permission(request, None))
