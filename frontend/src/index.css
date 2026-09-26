@@ -1,1 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --color-brand: #1a73e8;
+  --color-brand-dark: #1557b0;
+  --color-accent: #1447e6;
+  --color-ink: #364152;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-surface: #ffffff;
+  --color-canvas: #f7f9fc;
+  --color-line: #dce2ea;
+}
+
+@layer base {
+  body { margin: 0; font-family: var(--font-sans); font-size: 16px;
+    line-height: 1.5; color: var(--color-ink); background: var(--color-canvas); }
+  :focus-visible { outline: 3px solid var(--color-accent); outline-offset: 3px; }
+  input[type='checkbox'] { accent-color: var(--color-brand); width: 20px; height: 20px; }
+}
+
+@layer components {
+  .mt-card { @apply w-full rounded-2xl border border-line bg-surface p-5 shadow-sm sm:p-6; }
+  .mt-input { @apply mt-2 w-full rounded-lg border border-line bg-surface p-3 font-normal text-ink; }
+  .mt-button { @apply min-h-11 rounded-lg bg-brand px-5 py-3 font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50; }
+  .mt-file { @apply block min-h-11 w-full min-w-0 rounded-lg border border-line bg-surface p-2 text-sm text-ink; }
+  .mt-file::file-selector-button { @apply mr-3 rounded-md bg-blue-50 px-3 py-2 font-semibold text-accent; }
+}

@@ -9,13 +9,13 @@ const estados = {
 function SeleccionCatalogo({ titulo, opciones, seleccion, onChange, disabled }) {
   return (
     <fieldset disabled={disabled} className="space-y-2">
-      <legend className="font-semibold text-slate-800">{titulo}</legend>
+      <legend className="font-semibold text-ink">{titulo}</legend>
       {opciones.length === 0 && (
-        <p className="text-sm text-slate-600">El catálogo todavía no está disponible.</p>
+        <p className="text-sm text-ink">El catálogo todavía no está disponible.</p>
       )}
       <div className="flex flex-wrap gap-3">
         {opciones.map(({ id, nombre }) => (
-          <label key={id} className="flex items-center gap-2 rounded border border-slate-300 p-3">
+          <label key={id} className="flex min-h-11 items-center gap-2 rounded-lg border border-line p-3">
             <input
               type="checkbox"
               checked={seleccion.includes(id)}
@@ -71,10 +71,10 @@ export default function PerfilTecnicoForm({
   }
 
   return (
-    <form onSubmit={guardar} className="mx-auto max-w-2xl space-y-6 rounded-xl bg-white p-6 shadow-sm">
+    <form onSubmit={guardar} className="mt-card mx-auto max-w-2xl space-y-6">
       <header>
-        <h2 className="text-2xl font-bold text-slate-900">Mi perfil técnico</h2>
-        <p className="mt-2 text-slate-600">Contá qué servicios ofrecés y dónde trabajás.</p>
+        <h2 className="text-2xl font-bold text-ink">Mi perfil técnico</h2>
+        <p className="mt-2 text-ink">Contá qué servicios ofrecés y dónde trabajás.</p>
         <p className="mt-3 text-sm font-medium">
           Estado: {estados[perfil.estado_validacion] ?? 'Todavía sin verificar'}
         </p>
@@ -83,19 +83,19 @@ export default function PerfilTecnicoForm({
         <label htmlFor={descripcionId} className="block font-semibold">Descripción profesional</label>
         <textarea id={descripcionId} value={descripcion}
           onChange={(event) => setDescripcion(event.target.value)} rows={4}
-          className="w-full rounded border border-slate-300 p-3"
+          className="mt-input"
           placeholder="Describí tu experiencia y los servicios que realizás." />
-        <p className="text-sm text-slate-600">Opcional. No incluyas datos de tu DNI ni documentos.</p>
+        <p className="text-sm text-ink">Opcional. No incluyas datos de tu DNI ni documentos.</p>
       </fieldset>
       <SeleccionCatalogo titulo="Especialidades" opciones={especialidades}
         seleccion={seleccionEspecialidades} onChange={setSeleccionEspecialidades} disabled={guardando} />
       <SeleccionCatalogo titulo="Zonas de cobertura" opciones={zonas}
         seleccion={seleccionZonas} onChange={setSeleccionZonas} disabled={guardando} />
-      {!conectado && <p className="text-sm text-slate-600">El guardado todavía no está disponible.</p>}
-      {error && <p role="alert" className="text-red-700">{error}</p>}
-      <p role="status" className="text-green-800">{mensaje}</p>
+      {!conectado && <p className="text-sm text-ink">El guardado todavía no está disponible.</p>}
+      {error && <p role="alert" className="border-l-4 border-danger pl-3 text-red-800">{error}</p>}
+      <p role="status" className={mensaje ? "border-l-4 border-success pl-3 text-green-800" : ""}>{mensaje}</p>
       <button type="submit" disabled={guardando || !conectado || !catalogosDisponibles}
-        className="rounded bg-blue-700 px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
+        className="mt-button">
         {guardando ? 'Guardando…' : 'Guardar perfil'}
       </button>
     </form>

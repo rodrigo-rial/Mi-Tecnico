@@ -13,9 +13,9 @@ import {
 } from '../services/tecnicosApi'
 
 const estilosEstado = {
-  PENDIENTE: 'bg-amber-100 text-amber-800',
-  APROBADO: 'bg-emerald-100 text-emerald-800',
-  RECHAZADO: 'bg-red-100 text-red-800',
+  PENDIENTE: 'border border-warning bg-amber-50 text-amber-900',
+  APROBADO: 'border border-success bg-emerald-50 text-emerald-900',
+  RECHAZADO: 'border border-danger bg-red-50 text-red-900',
 }
 
 const etiquetasEstado = {
@@ -30,10 +30,9 @@ async function solicitarDatosPanel(token) {
     obtenerZonas(token),
   ])
 
+  let perfil
   try {
-    const perfil = await obtenerPerfilTecnico(token)
-    const documentacion = await obtenerDocumentacionTecnico(token)
-    return { especialidades, zonas, perfil, documentacion }
+    perfil = await obtenerPerfilTecnico(token)
   } catch (solicitudError) {
     if (solicitudError.status === 404) {
       return {
@@ -45,6 +44,8 @@ async function solicitarDatosPanel(token) {
     }
     throw solicitudError
   }
+  const documentacion = await obtenerDocumentacionTecnico(token)
+  return { especialidades, zonas, perfil, documentacion }
 }
 
 export default function PanelTecnico({ token }) {
@@ -122,10 +123,10 @@ export default function PanelTecnico({ token }) {
 
   if (!token) {
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-12">
-        <section className="mx-auto max-w-xl rounded-xl bg-white p-8 text-center shadow-sm">
-          <h1 className="text-3xl font-bold text-blue-700">Panel del técnico</h1>
-          <p className="mt-4 text-slate-600">
+      <main className="min-h-screen bg-canvas px-4 py-12">
+        <section className="mx-auto max-w-xl mt-card text-center">
+          <h1 className="text-3xl font-bold text-brand">Panel del técnico</h1>
+          <p className="mt-4 text-ink">
             Iniciá sesión con una cuenta de técnico para administrar tu perfil.
           </p>
         </section>
@@ -136,9 +137,9 @@ export default function PanelTecnico({ token }) {
   const estado = perfil?.estado_validacion
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-canvas px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl space-y-8">
-        <header className="rounded-xl bg-blue-700 p-6 text-white shadow-sm sm:p-8">
+        <header className="rounded-2xl bg-gradient-to-br from-brand to-brand-dark p-6 text-white shadow-sm sm:p-8">
           <p className="text-sm font-semibold uppercase tracking-wider text-blue-100">
             MiTécnico
           </p>
@@ -158,17 +159,17 @@ export default function PanelTecnico({ token }) {
         </header>
 
         {cargando && (
-          <section className="rounded-xl bg-white p-8 text-center text-slate-600 shadow-sm">
+          <section role="status" className="mt-card text-center text-ink">
             Cargando tu información…
           </section>
         )}
 
         {!cargando && error && (
-          <section role="alert" className="rounded-xl border border-red-200 bg-red-50 p-6">
+          <section role="alert" className="rounded-xl border border-danger bg-red-50 p-6">
             <h2 className="font-bold text-red-800">No pudimos cargar el panel</h2>
             <p className="mt-2 text-red-700">{error}</p>
             <button type="button" onClick={reintentarCarga}
-              className="mt-4 rounded bg-red-700 px-4 py-2 font-semibold text-white">
+              className="mt-button mt-4">
               Volver a intentar
             </button>
           </section>
@@ -193,12 +194,12 @@ export default function PanelTecnico({ token }) {
               )}
             </div>
 
-            <aside className="h-fit rounded-xl bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900">Pasos para validar tu perfil</h2>
-              <ol className="mt-4 space-y-4 text-sm text-slate-600">
-                <li><strong className="text-blue-700">1.</strong> Completá tu perfil profesional.</li>
-                <li><strong className="text-blue-700">2.</strong> Cargá DNI y matrícula.</li>
-                <li><strong className="text-blue-700">3.</strong> Esperá la revisión del administrador.</li>
+            <aside className="mt-card h-fit">
+              <h2 className="text-lg font-bold text-ink">Pasos para validar tu perfil</h2>
+              <ol className="mt-4 space-y-4 text-sm text-ink">
+                <li><strong className="text-brand">1.</strong> Completá tu perfil profesional.</li>
+                <li><strong className="text-brand">2.</strong> Cargá DNI y matrícula.</li>
+                <li><strong className="text-brand">3.</strong> Esperá la revisión del administrador.</li>
               </ol>
               {!perfil && (
                 <p className="mt-5 rounded-lg bg-blue-50 p-4 text-sm text-blue-800">
