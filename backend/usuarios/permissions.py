@@ -4,7 +4,7 @@ from .models import Usuario
 
 
 class EsCliente(BasePermission):
-    message = "Esta funcion está disponible solamente para clientes."
+    message = "Esta función está disponible solamente para clientes."
 
     def has_permission(self, request, view):
         usuario = request.user
@@ -18,7 +18,7 @@ class EsCliente(BasePermission):
 
 
 class EsTecnico(BasePermission):
-    message = "Esta funcion esta disponible solamente para tecnicos."
+    message = "Esta función está disponible solamente para técnicos."
 
     def has_permission(self, request, view):
         usuario = request.user
@@ -32,7 +32,7 @@ class EsTecnico(BasePermission):
 
 
 class EsAdministrador(BasePermission):
-    message = "Esta funcion esta disponible solamente para administradores."
+    message = "Esta función está disponible solamente para administradores."
 
     def has_permission(self, request, view):
         usuario = request.user
