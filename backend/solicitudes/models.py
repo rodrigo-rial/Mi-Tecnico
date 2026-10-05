@@ -162,3 +162,82 @@ class Propuesta(models.Model):
 
     def es_propietario_solicitud(self, usuario):
         return usuario.pk == self.solicitud.cliente_id
+
+
+class Trabajo(models.Model):
+    class Estado(models.TextChoices):
+        PENDIENTE = "pendiente", "Pendiente"
+        EN_PROCESO = "en_proceso", "En proceso"
+        FINALIZADO = "finalizado", "Finalizado"
+        CANCELADO = "cancelado", "Cancelado"
+ 
+    # Transiciones permitidas (cambios controlados de estado).
+    TRANSICIONES = {
+        Estado.PENDIENTE: {Estado.EN_PROCESO, Estado.CANCELADO},
+        Estado.EN_PROCESO: {Estado.FINALIZADO, Estado.CANCELADO},
+        Estado.FINALIZADO: set(),
+        Estado.CANCELADO: set(),
+    }
+ 
+    solicitud = models.OneToOneField(
+        Solicitud, on_delete=models.PROTECT, related_name="trabajo"
+    )
+    propuesta = models.OneToOneField(
+        Propuesta, on_delete=models.PROTECT, related_name="trabajo"
+    )
+    cliente = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="trabajos_como_cliente",
+    )
+    tecnico = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="trabajos_como_tecnico",
+    )
+    precio_acordado = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    estado = models.CharField(
+        max_length=12, choices=Estado.choices, default=Estado.PENDIENTE
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+ 
+    class Meta:
+        ordering = ["-created_at"]
+ 
+    def __str__(self):
+        return f"Trabajo #{self.pk} [{self.estado}]"
+ 
+    def clean(self):
+        super().clean()
+        if (
+            self.solicitud_id
+            and self.cliente_id
+            and self.solicitud.cliente_id != self.cliente_id
+        ):
+            raise ValidationError("El cliente no coincide con el dueño de la solicitud.")
+        if self.propuesta_id:
+            if self.propuesta.solicitud_id != self.solicitud_id:
+                raise ValidationError("La propuesta no pertenece a la solicitud.")
+            if self.propuesta.tecnico_id != self.tecnico_id:
+                raise ValidationError("El técnico no coincide con el de la propuesta.")
+ 
+    def es_participante(self, usuario):
+        return usuario.pk in (self.cliente_id, self.tecnico_id)
+ 
+    def cambiar_estado(self, nuevo_estado):
+        try:
+            actual = self.Estado(self.estado)
+            nuevo = self.Estado(nuevo_estado)
+        except ValueError:
+            raise ValidationError("Estado de trabajo inválido.")
+        if nuevo not in self.TRANSICIONES[actual]:
+            raise ValidationError(
+                f"Transición inválida: {actual.value} → {nuevo.value}."
+            )
+        self.estado = nuevo
+        self.save(update_fields=["estado", "updated_at"])
