@@ -5,8 +5,12 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from solicitudes.models import Solicitud
+from solicitudes.models import Solicitud, Propuesta
 from tecnicos.models import Especialidad, PerfilTecnico, Zona
+
+from decimal import Decimal
+from datetime import date
+from django.db import IntegrityError
 
 User = get_user_model()
 
@@ -238,3 +242,160 @@ class SolicitudAPITests(APITestCase):
             response.status_code,
             [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND],
         )
+
+
+class PropuestaModeloTests(SolicitudBaseTest):
+    def setUp(self):
+        super().setUp()
+        self.tecnico_ok = crear_tecnico(
+            "t_propuesta_ok", [self.electricidad], [self.tolosa], estado="APROBADO"
+        )
+        self.tecnico_pendiente = crear_tecnico(
+            "t_propuesta_pend", [self.electricidad], [self.tolosa], estado="PENDIENTE"
+        )
+        self.tecnico_otra_zona = crear_tecnico(
+            "t_propuesta_zona", [self.electricidad], [self.city_bell], estado="APROBADO"
+        )
+        self.solicitud = self.nueva_solicitud()
+
+    def nueva_propuesta(self, **kwargs):
+        datos = {
+            "solicitud": self.solicitud,
+            "tecnico": self.tecnico_ok,
+            "precio": Decimal("1500.00"),
+            "descripcion_solucion": "Reparación estándar de instalación",
+            "fecha_disponible": date.today(),
+        }
+        datos.update(kwargs)
+        return Propuesta(**datos)
+
+    def test_tecnico_aprobado_y_compatible_pasa(self):
+        p = self.nueva_propuesta()
+        p.full_clean()
+        p.save()
+        self.assertEqual(Propuesta.objects.count(), 1)
+
+    def test_tecnico_pendiente_o_rechazado_falla(self):
+        p = self.nueva_propuesta(tecnico=self.tecnico_pendiente)
+        with self.assertRaises(ValidationError):
+            p.full_clean()
+
+    def test_especialidad_o_zona_distinta_falla(self):
+        p = self.nueva_propuesta(tecnico=self.tecnico_otra_zona)
+        with self.assertRaises(ValidationError):
+            p.full_clean()
+
+    def test_propuesta_duplicada_integrity_error(self):
+        p1 = self.nueva_propuesta()
+        p1.save()
+        with self.assertRaises(IntegrityError):
+            p2 = self.nueva_propuesta(precio=Decimal("2000.00"))
+            p2.save()
+
+    def test_dos_propuestas_aceptadas_en_misma_solicitud_integrity_error(self):
+        tecnico_2 = crear_tecnico(
+            "t_propuesta_ok2", [self.electricidad], [self.tolosa], estado="APROBADO"
+        )
+        p1 = self.nueva_propuesta(estado=Propuesta.Estado.ACEPTADA)
+        p1.save()
+
+        with self.assertRaises(IntegrityError):
+            p2 = self.nueva_propuesta(
+                tecnico=tecnico_2,
+                precio=Decimal("2000.00"),
+                estado=Propuesta.Estado.ACEPTADA,
+            )
+            p2.save()
+
+    def test_propuesta_sobre_solicitud_no_publicada_falla(self):
+        solicitud_cancelada = self.nueva_solicitud(estado=Solicitud.Estado.CANCELADA)
+        p = self.nueva_propuesta(solicitud=solicitud_cancelada)
+        with self.assertRaises(ValidationError):
+            p.full_clean()
+
+class PropuestaAPITests(APITestCase, SolicitudBaseTest):
+    def setUp(self):
+        super().setUp()
+        self.tecnico_ok = crear_tecnico(
+            "t_api_ok", [self.electricidad], [self.tolosa], estado="APROBADO"
+        )
+        self.tecnico_pendiente = crear_tecnico(
+            "t_api_pend", [self.electricidad], [self.tolosa], estado="PENDIENTE"
+        )
+        self.tecnico_otra_zona = crear_tecnico(
+            "t_api_zona", [self.electricidad], [self.city_bell], estado="APROBADO"
+        )
+        self.cliente_ajeno = crear_usuario("cliente_ajeno", rol="CLIENTE")
+        self.solicitud = self.nueva_solicitud()
+
+        self.url_propuestas = f"/api/solicitudes/{self.solicitud.id}/propuestas/"
+        self.payload = {
+            "precio": "1500.00",
+            "descripcion_solucion": "Reparación a domicilio",
+            "fecha_disponible": str(date.today()),
+        }
+
+    def test_tecnico_pendiente_no_puede_enviar(self):
+        self.client.force_authenticate(user=self.tecnico_pendiente)
+        res = self.client.post(self.url_propuestas, self.payload)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_tecnico_incompatible_devuelve_400_o_403(self):
+        self.client.force_authenticate(user=self.tecnico_otra_zona)
+        res = self.client.post(self.url_propuestas, self.payload)
+        self.assertIn(res.status_code, [status.HTTP_400_BAD_REQUEST, status.HTTP_403_FORBIDDEN])
+
+    def test_tecnico_aprobado_y_compatible_crea_propuesta(self):
+        self.client.force_authenticate(user=self.tecnico_ok)
+        res = self.client.post(self.url_propuestas, self.payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Propuesta.objects.filter(solicitud=self.solicitud).count(), 1)
+
+    def test_propuesta_duplicada_devuelve_400(self):
+        self.client.force_authenticate(user=self.tecnico_ok)
+        # Primer envío OK
+        res1 = self.client.post(self.url_propuestas, self.payload)
+        self.assertEqual(res1.status_code, status.HTTP_201_CREATED)
+
+        # Segundo envío: duplicado
+        res2 = self.client.post(self.url_propuestas, self.payload)
+        self.assertEqual(res2.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cliente_ajeno_no_ve_las_propuestas(self):
+        # Creamos una propuesta primero
+        Propuesta.objects.create(
+            solicitud=self.solicitud,
+            tecnico=self.tecnico_ok,
+            precio=Decimal("1500.00"),
+            descripcion_solucion="Arreglo",
+            fecha_disponible=date.today(),
+        )
+        self.client.force_authenticate(user=self.cliente_ajeno)
+        res = self.client.get(self.url_propuestas)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_cliente_dueno_si_ve_las_propuestas(self):
+        Propuesta.objects.create(
+            solicitud=self.solicitud,
+            tecnico=self.tecnico_ok,
+            precio=Decimal("1500.00"),
+            descripcion_solucion="Arreglo",
+            fecha_disponible=date.today(),
+        )
+        self.client.force_authenticate(user=self.cliente)
+        res = self.client.get(self.url_propuestas)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 1)
+
+    def test_endpoint_propuestas_mias(self):
+        Propuesta.objects.create(
+            solicitud=self.solicitud,
+            tecnico=self.tecnico_ok,
+            precio=Decimal("1500.00"),
+            descripcion_solucion="Arreglo",
+            fecha_disponible=date.today(),
+        )
+        self.client.force_authenticate(user=self.tecnico_ok)
+        res = self.client.get("/api/propuestas/mias/")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 1)

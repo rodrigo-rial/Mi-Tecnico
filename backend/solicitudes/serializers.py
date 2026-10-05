@@ -3,6 +3,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from .models import Solicitud
+from solicitudes.models import Propuesta
 
 
 def a_error_drf(exc):
@@ -69,3 +70,56 @@ class SolicitudSerializer(serializers.ModelSerializer):
             raise a_error_drf(exc)
 
         return attrs
+
+class PropuestaSerializer(serializers.ModelSerializer):
+    tecnico_nombre = serializers.ReadOnlyField(source="tecnico.get_full_name")
+    tecnico_username = serializers.ReadOnlyField(source="tecnico.username")
+
+    class Meta:
+        model = Propuesta
+        fields = [
+            "id",
+            "solicitud",
+            "tecnico",
+            "tecnico_nombre",
+            "tecnico_username",
+            "precio",
+            "descripcion_solucion",
+            "fecha_disponible",
+            "estado",
+        ]
+        read_only_fields = ["id", "solicitud", "tecnico", "estado", "creada_en", "actualizada_en"]
+
+    def validate(self, attrs):
+        # Inyectamos técnico y solicitud desde el contexto si están presentes
+        tecnico = self.context.get("tecnico") or getattr(self.instance, "tecnico", None)
+        solicitud = self.context.get("solicitud") or getattr(self.instance, "solicitud", None)
+
+        if (
+            self.instance is None
+            and solicitud is not None
+            and tecnico is not None
+            and Propuesta.objects.filter(solicitud=solicitud, tecnico=tecnico).exists()
+        ):
+            raise serializers.ValidationError(
+                "Ya enviaste una propuesta para esta solicitud."
+            )        
+
+        instancia_temp = Propuesta(
+            solicitud=solicitud,
+            tecnico=tecnico,
+            **attrs
+        )
+        try:
+            instancia_temp.clean()
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(
+                exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+            )
+
+        return attrs
+
+    def create(self, validated_data):
+        validated_data["tecnico"] = self.context["tecnico"]
+        validated_data["solicitud"] = self.context["solicitud"]
+        return super().create(validated_data)
