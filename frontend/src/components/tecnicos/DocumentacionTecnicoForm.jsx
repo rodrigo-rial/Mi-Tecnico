@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 
 const LIMITE_ARCHIVO_BYTES = 5 * 1024 * 1024
 const EXTENSIONES_PERMITIDAS = ['pdf', 'jpg', 'jpeg', 'png']
@@ -25,6 +25,11 @@ export default function DocumentacionTecnicoForm({
   documentacion = {},
   onGuardar,
 }) {
+  const archivoDniRef = useRef(null)
+  const archivoMatriculaRef = useRef(null)
+  const faltantes = []
+  if (!documentacion.tiene_documento_dni) faltantes.push('DNI')
+  if (!documentacion.tiene_documento_matricula) faltantes.push('matrícula')
   const dniId = useId()
   const matriculaId = useId()
   const documentoDniId = useId()
@@ -67,8 +72,15 @@ export default function DocumentacionTecnicoForm({
 
     setGuardando(true)
     try {
-      await onGuardar(datos)
-      setMensaje('Documentación guardada. El perfil quedó pendiente de revisión.')
+      const guardada = await onGuardar(datos)
+      const archivosFaltantes = []
+      if (!guardada.tiene_documento_dni) archivosFaltantes.push('DNI')
+      if (!guardada.tiene_documento_matricula) archivosFaltantes.push('matrícula')
+      setMensaje(archivosFaltantes.length
+        ? `Datos guardados. Falta adjuntar: ${archivosFaltantes.join(' y ')}.`
+        : 'Documentación completa guardada. Pendiente de revisión; todavía no está aprobada.')
+      if (archivoDniRef.current) archivoDniRef.current.value = ''
+      if (archivoMatriculaRef.current) archivoMatriculaRef.current.value = ''
       setDocumentoDni(null)
       setDocumentoMatricula(null)
     } catch {
@@ -88,6 +100,11 @@ export default function DocumentacionTecnicoForm({
         <p className="mt-3 font-medium text-ink">
           Estado: {etiquetasEstado[documentacion.estado_validacion] ?? 'Sin enviar'}
         </p>
+        {faltantes.length > 0 && (
+          <p className="mt-3 rounded-lg border border-warning bg-amber-50 p-3 text-sm text-amber-900">
+            Falta adjuntar: {faltantes.join(' y ')}. Podés guardar los números y completar los archivos después.
+          </p>
+        )}
       </header>
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -108,7 +125,7 @@ export default function DocumentacionTecnicoForm({
         <label htmlFor={documentoDniId} className="block font-semibold text-ink">
           Archivo de DNI
         </label>
-        <input id={documentoDniId} type="file" className="mt-file" accept=".pdf,.jpg,.jpeg,.png"
+        <input id={documentoDniId} ref={archivoDniRef} type="file" className="mt-file" accept=".pdf,.jpg,.jpeg,.png"
           disabled={guardando} onChange={(event) => setDocumentoDni(event.target.files[0] ?? null)} />
         <p className="text-sm text-ink">
           {documentacion.tiene_documento_dni ? 'Ya existe un archivo cargado. Elegir otro lo reemplazará.' : 'Todavía no hay un archivo cargado.'}
@@ -119,7 +136,7 @@ export default function DocumentacionTecnicoForm({
         <label htmlFor={documentoMatriculaId} className="block font-semibold text-ink">
           Archivo de matrícula
         </label>
-        <input id={documentoMatriculaId} type="file" className="mt-file" accept=".pdf,.jpg,.jpeg,.png"
+        <input id={documentoMatriculaId} ref={archivoMatriculaRef} type="file" className="mt-file" accept=".pdf,.jpg,.jpeg,.png"
           disabled={guardando}
           onChange={(event) => setDocumentoMatricula(event.target.files[0] ?? null)} />
         <p className="text-sm text-ink">

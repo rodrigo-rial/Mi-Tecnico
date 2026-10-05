@@ -119,6 +119,7 @@ export default function PanelTecnico({ token }) {
       ...perfilActual,
       estado_validacion: documentacionGuardada.estado_validacion,
     }))
+    return documentacionGuardada
   }
 
   if (!token) {
