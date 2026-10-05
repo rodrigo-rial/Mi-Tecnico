@@ -1,6 +1,6 @@
 # Técnicos: contrato del backend
 
-Estado: implementado en `feature/tecnicos-base`.
+Estado: módulo de perfil y documentación integrado en develop; catálogo de zonas ampliado en feature/zonas-cobertura.
 
 ## Autenticación y permisos
 
@@ -32,7 +32,49 @@ Devuelve las especialidades activas como objetos con `id` y `nombre`.
 Devuelve las zonas activas como objetos con `id` y `nombre`.
 
 Las especialidades iniciales son Electricidad, Gas, Plomería y Refrigeración.
-El equipo debe acordar las zonas reales antes de crear sus datos iniciales.
+La migración `0004_cargar_zonas_iniciales` carga 33 zonas de servicio.
+Son opciones por localidad o barrio, no límites geográficos ni cálculo de distancia.
+El cliente y el técnico deben usar los mismos identificadores del catálogo.
+
+- La Plata — casco urbano
+- Tolosa
+- Ringuelet
+- Gonnet
+- City Bell
+- Villa Elisa
+- Los Hornos
+- Berisso
+- Ensenada
+- Berazategui
+- Ranelagh
+- Hudson
+- Quilmes
+- Bernal
+- Don Bosco
+- Ezpeleta
+- Florencio Varela
+- Wilde
+- Avellaneda
+- Lanús
+- Banfield
+- Lomas de Zamora
+- Temperley
+- La Boca
+- Barracas
+- Constitución
+- San Telmo
+- Monserrat
+- Balvanera
+- Almagro
+- Caballito
+- Flores
+- Palermo
+
+La carga conserva las zonas existentes y no reactiva las deshabilitadas.
+Al revertir la migración se conservan los datos para no eliminar asociaciones.
+Cada integrante debe ejecutar `docker compose exec backend python manage.py migrate`.
+
+La pantalla agrupa las zonas en desplegables: La Plata y alrededores, Zona sur y CABA. Las opciones anteriores o nuevas que no pertenezcan a esos grupos se muestran en Otras zonas. Esta agrupación es visual: la API sigue recibiendo una lista de identificadores de zonas y permite elegir varias de distintos sectores.
 
 ## Perfil propio
 
