@@ -61,8 +61,16 @@ class PerfilTecnicoSerializer(serializers.ModelSerializer):
 
 
 class DocumentacionTecnicoSerializer(serializers.ModelSerializer):
-    documento_dni = serializers.FileField(write_only=True, required=False)
-    documento_matricula = serializers.FileField(write_only=True, required=False)
+    documento_dni = serializers.FileField(
+        write_only=True,
+        required=False,
+        validators=PerfilTecnico._meta.get_field("documento_dni").validators,
+    )
+    documento_matricula = serializers.FileField(
+        write_only=True,
+        required=False,
+        validators=PerfilTecnico._meta.get_field("documento_matricula").validators,
+    )
     tiene_documento_dni = serializers.SerializerMethodField()
     tiene_documento_matricula = serializers.SerializerMethodField()
 

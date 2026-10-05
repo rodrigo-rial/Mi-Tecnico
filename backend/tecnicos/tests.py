@@ -365,3 +365,52 @@ class PerfilTecnicoAPITests(APITestCase):
                 self.perfil.save()
 
                 self.assertTrue(permiso.has_permission(request, None))
+
+
+    def test_api_rechaza_documentos_invalidos_sin_modificar_perfil(self):
+        self.client.force_authenticate(user=self.tecnico)
+        for campo in ("documento_dni", "documento_matricula"):
+            for nombre, contenido in (
+                ("invalido.txt", b"texto"),
+                ("grande.pdf", b"x" * (LIMITE_DOCUMENTO_BYTES + 1)),
+            ):
+                with self.subTest(campo=campo, nombre=nombre):
+                    with tempfile.TemporaryDirectory() as directorio:
+                        with override_settings(MEDIA_ROOT=directorio):
+                            respuesta = self.client.patch(
+                                reverse("documentacion_tecnico"),
+                                {campo: SimpleUploadedFile(nombre, contenido),
+                                 "dni_numero": "99999999"},
+                                format="multipart",
+                            )
+                            self.assertEqual(respuesta.status_code, 400)
+                            self.assertIn(campo, respuesta.data)
+                            self.perfil.refresh_from_db()
+                            self.assertEqual(self.perfil.dni_numero, "")
+                            self.assertFalse(getattr(self.perfil, campo))
+
+    def test_reemplazo_documento_elimina_anterior_y_conserva_otro(self):
+        self.client.force_authenticate(user=self.tecnico)
+        with tempfile.TemporaryDirectory() as directorio:
+            with override_settings(MEDIA_ROOT=directorio):
+                self.perfil.dni_numero = "12345678"
+                self.perfil.matricula_numero = "PRUEBA"
+                self.perfil.documento_dni = SimpleUploadedFile("anterior.pdf", b"viejo")
+                self.perfil.documento_matricula = SimpleUploadedFile("matricula.pdf", b"matricula")
+                self.perfil.estado_validacion = PerfilTecnico.EstadoValidacion.APROBADO
+                self.perfil.save()
+                anterior = self.perfil.documento_dni.name
+                matricula = self.perfil.documento_matricula.name
+                storage = self.perfil.documento_dni.storage
+                respuesta = self.client.patch(
+                    reverse("documentacion_tecnico"),
+                    {"documento_dni": SimpleUploadedFile("nuevo.pdf", b"nuevo")},
+                    format="multipart",
+                )
+                self.assertEqual(respuesta.status_code, 200)
+                self.perfil.refresh_from_db()
+                self.assertFalse(storage.exists(anterior))
+                self.assertTrue(storage.exists(self.perfil.documento_dni.name))
+                self.assertEqual(self.perfil.documento_matricula.name, matricula)
+                self.assertTrue(storage.exists(matricula))
+                self.assertEqual(self.perfil.estado_validacion, "PENDIENTE")
