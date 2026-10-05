@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils import timezone
 from rest_framework import serializers
-
 from .models import Solicitud
 from solicitudes.models import Propuesta
 
