@@ -31,6 +31,49 @@ function SeleccionCatalogo({ titulo, opciones, seleccion, onChange, disabled }) 
   )
 }
 
+const sectoresZonas = [
+  { titulo: 'La Plata y alrededores', nombres: ['La Plata — casco urbano', 'Tolosa', 'Ringuelet', 'Gonnet', 'City Bell', 'Villa Elisa', 'Los Hornos', 'Berisso', 'Ensenada'] },
+  { titulo: 'Zona sur', nombres: ['Berazategui', 'Ranelagh', 'Hudson', 'Quilmes', 'Bernal', 'Don Bosco', 'Ezpeleta', 'Florencio Varela', 'Wilde', 'Avellaneda', 'Lanús', 'Banfield', 'Lomas de Zamora', 'Temperley'] },
+  { titulo: 'CABA', nombres: ['La Boca', 'Barracas', 'Constitución', 'San Telmo', 'Monserrat', 'Balvanera', 'Almagro', 'Caballito', 'Flores', 'Palermo'] },
+]
+
+function SeleccionZonas({ opciones, seleccion, onChange, disabled }) {
+  const grupos = sectoresZonas.map(({ titulo, nombres }) => ({
+    titulo,
+    opciones: opciones.filter(({ nombre }) => nombres.includes(nombre)),
+  }))
+  const otras = opciones.filter(({ nombre }) =>
+    !sectoresZonas.some(({ nombres }) => nombres.includes(nombre)))
+  // Mantener accesibles las zonas anteriores o agregadas desde administración.
+  if (otras.length) grupos.push({ titulo: 'Otras zonas', opciones: otras })
+
+  return (
+    <fieldset disabled={disabled} className="min-w-0 space-y-3">
+      <legend className="font-semibold text-ink">Zonas de cobertura</legend>
+      <p className="text-sm text-ink">Desplegá cada sector y marcá dónde trabajás. Podés elegir varias zonas.</p>
+      {opciones.length === 0 && <p className="text-sm text-ink">El catálogo todavía no está disponible.</p>}
+      {grupos.filter((grupo) => grupo.opciones.length > 0).map((grupo) => {
+        const cantidad = grupo.opciones.filter(({ id }) => seleccion.includes(id)).length
+        return (
+          <details key={grupo.titulo} className="rounded-xl border border-line bg-surface">
+            <summary className="min-h-11 cursor-pointer rounded-xl p-4 font-semibold text-ink hover:bg-blue-50">
+              {grupo.titulo}
+              <span className="ml-2 inline-block rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-brand">
+                {cantidad} seleccionadas
+              </span>
+            </summary>
+            <div className="border-t border-line p-3 sm:p-4">
+              <SeleccionCatalogo titulo={`Localidades y barrios de ${grupo.titulo}`}
+                opciones={grupo.opciones} seleccion={seleccion}
+                onChange={onChange} disabled={disabled} />
+            </div>
+          </details>
+        )
+      })}
+    </fieldset>
+  )
+}
+
 // Montar después de cargar el perfil y los catálogos. Usar key={perfil.id}
 // al cambiar de perfil. onGuardar debe rechazar su promesa si falla la API.
 export default function PerfilTecnicoForm({
@@ -89,7 +132,7 @@ export default function PerfilTecnicoForm({
       </fieldset>
       <SeleccionCatalogo titulo="Especialidades" opciones={especialidades}
         seleccion={seleccionEspecialidades} onChange={setSeleccionEspecialidades} disabled={guardando} />
-      <SeleccionCatalogo titulo="Zonas de cobertura" opciones={zonas}
+      <SeleccionZonas opciones={zonas}
         seleccion={seleccionZonas} onChange={setSeleccionZonas} disabled={guardando} />
       {!conectado && <p className="text-sm text-ink">El guardado todavía no está disponible.</p>}
       {error && <p role="alert" className="border-l-4 border-danger pl-3 text-red-800">{error}</p>}

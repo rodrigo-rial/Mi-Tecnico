@@ -136,13 +136,15 @@ class PerfilTecnicoAPITests(APITestCase):
 
         self.assertEqual(especialidades.status_code, status.HTTP_200_OK)
         self.assertEqual(zonas.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(zonas.data), 1)
         nombres_especialidades = {
             especialidad["nombre"] for especialidad in especialidades.data
         }
         self.assertIn("Electricidad", nombres_especialidades)
         self.assertNotIn("Inactiva", nombres_especialidades)
-        self.assertEqual(zonas.data[0]["nombre"], "Zona Centro")
+        nombres_zonas = {zona["nombre"] for zona in zonas.data}
+        self.assertIn("Zona Centro", nombres_zonas)
+        self.assertIn("City Bell", nombres_zonas)
+        self.assertNotIn("Inactiva", nombres_zonas)
 
     def test_perfil_incompleto_no_puede_aprobarse(self):
         self.perfil.estado_validacion = PerfilTecnico.EstadoValidacion.APROBADO
