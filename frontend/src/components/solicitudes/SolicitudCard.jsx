@@ -1,11 +1,26 @@
+import { Link } from 'react-router-dom'
+
 import Badge from '../comunes/Badge'
 import { formatearFecha, formatearFechaHora } from '../../utils/formato'
+import { rutaDetalleSolicitud } from '../../utils/navegacion'
 
-function SolicitudCard({ solicitud }) {
+// completa: en el detalle se muestra la descripción entera y sin enlace.
+function SolicitudCard({ solicitud, completa = false }) {
   return (
     <article className="mt-card">
       <div className="flex items-start justify-between gap-3">
-        <h2 className="text-lg font-semibold text-ink">{solicitud.titulo}</h2>
+        <h2 className="text-lg font-semibold text-ink">
+          {completa ? (
+            solicitud.titulo
+          ) : (
+            <Link
+              to={rutaDetalleSolicitud(solicitud.id)}
+              className="hover:text-brand hover:underline"
+            >
+              {solicitud.titulo}
+            </Link>
+          )}
+        </h2>
         <div className="flex shrink-0 flex-wrap justify-end gap-2">
           {solicitud.es_urgente && <Badge texto="Urgente" tono="error" />}
           <Badge estado={solicitud.estado} />
@@ -16,7 +31,9 @@ function SolicitudCard({ solicitud }) {
         {solicitud.especialidad_nombre} · {solicitud.zona_nombre}
       </p>
 
-      <p className="mt-3 line-clamp-2 text-ink">{solicitud.descripcion}</p>
+      <p className={`mt-3 whitespace-pre-line text-ink ${completa ? '' : 'line-clamp-2'}`}>
+        {solicitud.descripcion}
+      </p>
 
       <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
         <div>
@@ -36,6 +53,17 @@ function SolicitudCard({ solicitud }) {
           </dd>
         </div>
       </dl>
+
+      {!completa && (
+        <p className="mt-4">
+          <Link
+            to={rutaDetalleSolicitud(solicitud.id)}
+            className="text-sm font-semibold text-brand hover:underline"
+          >
+            Ver detalle y propuestas
+          </Link>
+        </p>
+      )}
     </article>
   )
 }

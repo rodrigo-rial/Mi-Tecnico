@@ -41,3 +41,8 @@ export function hoyISO() {
   const dia = String(hoy.getDate()).padStart(2, '0')
   return `${hoy.getFullYear()}-${mes}-${dia}`
 }
+
+/** Nombre completo si existe; si no, el nombre de usuario. */
+export function nombreVisible(nombreCompleto, usuario, respaldo = 'Técnico') {
+  return nombreCompleto?.trim() || usuario || respaldo
+}
