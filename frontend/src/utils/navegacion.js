@@ -4,7 +4,14 @@ export const ENLACES_CLIENTE = [
   { to: '/cuenta', texto: 'Mi cuenta' },
 ]
 
+export const ENLACES_TECNICO = [
+  { to: '/tecnico/solicitudes', texto: 'Solicitudes' },
+  { to: '/tecnico/propuestas', texto: 'Mis propuestas' },
+  { to: '/tecnico', texto: 'Mi perfil', end: true },
+]
+
 export const RUTA_SOLICITUDES_CLIENTE = '/cliente/solicitudes'
+export const RUTA_PERFIL_TECNICO = '/tecnico'
 
 export function rutaDetalleSolicitud(id) {
   return `/cliente/solicitudes/${id}`

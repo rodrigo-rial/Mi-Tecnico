@@ -4,21 +4,31 @@ import Badge from '../comunes/Badge'
 import { formatearFecha, formatearFechaHora } from '../../utils/formato'
 import { rutaDetalleSolicitud } from '../../utils/navegacion'
 
-// completa: en el detalle se muestra la descripción entera y sin enlace.
-function SolicitudCard({ solicitud, completa = false }) {
+/**
+ * completa: muestra la descripción entera (detalle).
+ * conEnlace: el título y "Ver detalle" llevan al detalle del cliente; por
+ *   defecto solo en el modo resumen. El técnico lo desactiva.
+ * children: acciones u otro contenido al pie de la tarjeta.
+ */
+function SolicitudCard({
+  solicitud,
+  completa = false,
+  conEnlace = !completa,
+  children,
+}) {
   return (
     <article className="mt-card">
       <div className="flex items-start justify-between gap-3">
         <h2 className="text-lg font-semibold text-ink">
-          {completa ? (
-            solicitud.titulo
-          ) : (
+          {conEnlace ? (
             <Link
               to={rutaDetalleSolicitud(solicitud.id)}
               className="hover:text-brand hover:underline"
             >
               {solicitud.titulo}
             </Link>
+          ) : (
+            solicitud.titulo
           )}
         </h2>
         <div className="flex shrink-0 flex-wrap justify-end gap-2">
@@ -54,7 +64,7 @@ function SolicitudCard({ solicitud, completa = false }) {
         </div>
       </dl>
 
-      {!completa && (
+      {conEnlace && !completa && (
         <p className="mt-4">
           <Link
             to={rutaDetalleSolicitud(solicitud.id)}
@@ -64,6 +74,8 @@ function SolicitudCard({ solicitud, completa = false }) {
           </Link>
         </p>
       )}
+
+      {children && <div className="mt-4">{children}</div>}
     </article>
   )
 }

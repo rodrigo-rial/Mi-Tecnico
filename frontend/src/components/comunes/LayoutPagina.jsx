@@ -1,6 +1,21 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 
-function LayoutPagina({ titulo, descripcion, enlaces = [], children }) {
+import { cerrarSesion } from '../../services/authApi'
+
+function LayoutPagina({
+  titulo,
+  descripcion,
+  enlaces = [],
+  conCerrarSesion = false,
+  children,
+}) {
+  const navigate = useNavigate()
+
+  function salir() {
+    cerrarSesion()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <main className="min-h-screen bg-canvas px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl space-y-6">
@@ -13,7 +28,7 @@ function LayoutPagina({ titulo, descripcion, enlaces = [], children }) {
             <p className="mt-2 max-w-2xl text-blue-100">{descripcion}</p>
           )}
 
-          {enlaces.length > 0 && (
+          {(enlaces.length > 0 || conCerrarSesion) && (
             <nav aria-label="Navegación principal" className="mt-5 flex flex-wrap gap-2">
               {enlaces.map(({ to, texto, end }) => (
                 <NavLink
@@ -30,6 +45,16 @@ function LayoutPagina({ titulo, descripcion, enlaces = [], children }) {
                   {texto}
                 </NavLink>
               ))}
+
+              {conCerrarSesion && (
+                <button
+                  type="button"
+                  onClick={salir}
+                  className="inline-flex min-h-11 items-center rounded-lg bg-white/15 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/25 sm:ml-auto"
+                >
+                  Cerrar sesión
+                </button>
+              )}
             </nav>
           )}
         </header>
