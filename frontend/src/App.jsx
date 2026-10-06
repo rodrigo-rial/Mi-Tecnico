@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage'
 import RegistroPage from './pages/RegistroPage'
 import CuentaPage from './pages/CuentaPage'
 import PanelTecnicoToken from './pages/PanelTecnicoToken'
+import DetalleSolicitudPage from './pages/DetalleSolicitudPage'
 import NuevaSolicitudPage from './pages/NuevaSolicitudPage'
 import SolicitudesClientePage from './pages/SolicitudesClientePage'
 import RutaProtegida from './components/RutaProtegida'
@@ -55,6 +56,10 @@ function App() {
         <Route
           path="/cliente/solicitudes/nueva"
           element={<NuevaSolicitudPage />}
+        />
+        <Route
+          path="/cliente/solicitudes/:id"
+          element={<DetalleSolicitudPage />}
         />
       </Route>
 
