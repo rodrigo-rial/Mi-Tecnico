@@ -8,6 +8,8 @@ import LoginPage from './pages/LoginPage'
 import RegistroPage from './pages/RegistroPage'
 import CuentaPage from './pages/CuentaPage'
 import PanelTecnicoToken from './pages/PanelTecnicoToken'
+import NuevaSolicitudPage from './pages/NuevaSolicitudPage'
+import SolicitudesClientePage from './pages/SolicitudesClientePage'
 import RutaProtegida from './components/RutaProtegida'
 
 function App() {
@@ -38,6 +40,21 @@ function App() {
         <Route
           path="/cuenta"
           element={<CuentaPage />}
+        />
+      </Route>
+
+      <Route
+        element={(
+          <RutaProtegida rolesPermitidos={['CLIENTE']} />
+        )}
+      >
+        <Route
+          path="/cliente/solicitudes"
+          element={<SolicitudesClientePage />}
+        />
+        <Route
+          path="/cliente/solicitudes/nueva"
+          element={<NuevaSolicitudPage />}
         />
       </Route>
 

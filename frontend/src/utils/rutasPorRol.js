@@ -4,6 +4,8 @@ export function obtenerRutaPorRol(rol) {
       return '/tecnico'
 
     case 'CLIENTE':
+      return '/cliente/solicitudes'
+
     case 'ADMINISTRADOR':
       return '/cuenta'
 
