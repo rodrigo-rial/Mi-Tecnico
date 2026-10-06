@@ -27,6 +27,9 @@ function PanelTecnicoToken() {
           <Link to="/tecnico/propuestas" className={CLASE_ENLACE}>
             Mis propuestas
           </Link>
+          <Link to="/trabajos" className={CLASE_ENLACE}>
+            Mis trabajos
+          </Link>
         </nav>
 
         <button

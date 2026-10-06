@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils import timezone
 from rest_framework import serializers
+
 from .models import Solicitud
 from solicitudes.models import Propuesta
 
@@ -74,11 +75,27 @@ class PropuestaSerializer(serializers.ModelSerializer):
     tecnico_nombre = serializers.ReadOnlyField(source="tecnico.get_full_name")
     tecnico_username = serializers.ReadOnlyField(source="tecnico.username")
 
+    # Datos de la solicitud, para que el técnico distinga sus propuestas.
+    solicitud_titulo = serializers.ReadOnlyField(source="solicitud.titulo")
+    solicitud_estado = serializers.ReadOnlyField(source="solicitud.estado")
+    solicitud_direccion = serializers.ReadOnlyField(source="solicitud.direccion")
+    solicitud_es_urgente = serializers.ReadOnlyField(source="solicitud.es_urgente")
+    especialidad_nombre = serializers.ReadOnlyField(
+        source="solicitud.especialidad.nombre"
+    )
+    zona_nombre = serializers.ReadOnlyField(source="solicitud.zona.nombre")
+
     class Meta:
         model = Propuesta
         fields = [
             "id",
             "solicitud",
+            "solicitud_titulo",
+            "solicitud_estado",
+            "solicitud_direccion",
+            "solicitud_es_urgente",
+            "especialidad_nombre",
+            "zona_nombre",
             "tecnico",
             "tecnico_nombre",
             "tecnico_username",
@@ -86,23 +103,20 @@ class PropuestaSerializer(serializers.ModelSerializer):
             "descripcion_solucion",
             "fecha_disponible",
             "estado",
+            "created_at",
         ]
-        read_only_fields = ["id", "solicitud", "tecnico", "estado", "creada_en", "actualizada_en"]
+        read_only_fields = [
+            "id",
+            "solicitud",
+            "tecnico",
+            "estado",
+            "created_at",
+        ]
 
     def validate(self, attrs):
         # Inyectamos técnico y solicitud desde el contexto si están presentes
         tecnico = self.context.get("tecnico") or getattr(self.instance, "tecnico", None)
         solicitud = self.context.get("solicitud") or getattr(self.instance, "solicitud", None)
-
-        if (
-            self.instance is None
-            and solicitud is not None
-            and tecnico is not None
-            and Propuesta.objects.filter(solicitud=solicitud, tecnico=tecnico).exists()
-        ):
-            raise serializers.ValidationError(
-                "Ya enviaste una propuesta para esta solicitud."
-            )        
 
         instancia_temp = Propuesta(
             solicitud=solicitud,

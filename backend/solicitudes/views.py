@@ -109,6 +109,6 @@ class MisPropuestasView(APIView):
     permission_classes = [permissions.IsAuthenticated, EsTecnicoAprobado]
 
     def get(self, request):
-        propuestas = Propuesta.objects.filter(tecnico=request.user)
+        propuestas = Propuesta.objects.filter(tecnico=request.user).select_related("solicitud__especialidad", "solicitud__zona", "tecnico")
         serializer = PropuestaSerializer(propuestas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
