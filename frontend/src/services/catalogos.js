@@ -1,5 +1,6 @@
 import { extraerLista } from './http'
-import { obtenerAccessToken, obtenerSesionActual } from './authApi'
+import { obtenerAccessToken } from './authApi'
+import { conSesionRenovada } from './sesion'
 import { obtenerEspecialidades, obtenerZonas } from './tecnicosApi'
 
 function soloActivos(lista) {
@@ -19,19 +20,7 @@ async function pedirCatalogos() {
   }
 }
 
-/**
- * Especialidades y zonas para los selects. Los servicios de tecnicosApi no
- * renuevan el token, así que ante un 401 se renueva la sesión y se reintenta.
- */
-export async function cargarCatalogos() {
-  try {
-    return await pedirCatalogos()
-  } catch (error) {
-    if (error.status !== 401) throw error
-
-    const usuario = await obtenerSesionActual()
-    if (!usuario) throw error
-
-    return pedirCatalogos()
-  }
+/** Especialidades y zonas activas para los selects. */
+export function cargarCatalogos() {
+  return conSesionRenovada(pedirCatalogos)
 }
