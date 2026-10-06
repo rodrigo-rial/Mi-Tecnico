@@ -9,6 +9,8 @@ import RegistroPage from './pages/RegistroPage'
 import CuentaPage from './pages/CuentaPage'
 import PanelTecnicoToken from './pages/PanelTecnicoToken'
 import MisPropuestasPage from './pages/MisPropuestasPage'
+import MisTrabajosPage from './pages/MisTrabajosPage'
+import TrabajoDetallePage from './pages/TrabajoDetallePage'
 import SolicitudesTecnicoPage from './pages/SolicitudesTecnicoPage'
 import DetalleSolicitudPage from './pages/DetalleSolicitudPage'
 import NuevaSolicitudPage from './pages/NuevaSolicitudPage'
@@ -62,6 +64,23 @@ function App() {
         <Route
           path="/cliente/solicitudes/:id"
           element={<DetalleSolicitudPage />}
+        />
+      </Route>
+
+      <Route
+        element={(
+          <RutaProtegida
+            rolesPermitidos={['CLIENTE', 'TECNICO']}
+          />
+        )}
+      >
+        <Route
+          path="/trabajos"
+          element={<MisTrabajosPage />}
+        />
+        <Route
+          path="/trabajos/:id"
+          element={<TrabajoDetallePage />}
         />
       </Route>
 
