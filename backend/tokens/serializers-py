@@ -1,0 +1,17 @@
+from rest_framework import serializers
+from .models import TokenTrabajo
+
+class TokenTecnicoSerializer(serializers.ModelSerializer):
+    """Incluye el código sensible, únicamente visible para el Técnico asignado."""
+    class Meta:
+        model = TokenTrabajo
+        fields = ['id', 'trabajo', 'codigo', 'expira_en', 'es_valido']
+
+class TokenClienteSerializer(serializers.ModelSerializer):
+    """Oculta el código de 6 dígitos para el Cliente."""
+    class Meta:
+        model = TokenTrabajo
+        fields = ['id', 'trabajo', 'expira_en', 'es_valido', 'intentos_fallidos']
+
+class ValidarTokenSerializer(serializers.Serializer):
+    codigo = serializers.CharField(max_length=6, min_length=6)
