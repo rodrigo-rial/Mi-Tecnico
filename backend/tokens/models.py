@@ -1,41 +1,63 @@
-import secrets
+from django.conf import settings
 from django.db import models
-from django.utils import timezone
-from datetime import timedelta
-from solicitudes.models import Trabajo
+from django.db.models import Q
 
-def generar_codigo_6_digitos():
-    return f"{secrets.randbelow(1000000):06d}"
+# T1: cuánto dura vigente un código desde que se genera.
+DIAS_VIGENCIA_TOKEN = 7
+# T2: protección contra adivinar los 6 dígitos probando.
+MAX_INTENTOS_FALLIDOS = 5
+MINUTOS_BLOQUEO = 15
+
 
 class TokenTrabajo(models.Model):
-    trabajo = models.OneToOneField(
-        Trabajo, 
-        on_delete=models.CASCADE, 
-        related_name='token_validacion'
+    """Código de seguridad de 6 dígitos de un trabajo. NO es el JWT de sesión."""
+
+    class Estado(models.TextChoices):
+        GENERADO = "generado", "Generado"
+        VALIDADO = "validado", "Validado"
+        VENCIDO = "vencido", "Vencido"
+        CANCELADO = "cancelado", "Cancelado"
+
+    trabajo = models.ForeignKey(
+        "solicitudes.Trabajo", on_delete=models.PROTECT, related_name="tokens"
     )
-    codigo = models.CharField(max_length=6, default=generar_codigo_6_digitos)
+    # Cliente y técnico se copian del trabajo: el código queda asociado a ambos.
+    cliente = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="tokens_como_cliente",
+    )
+    tecnico = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="tokens_como_tecnico",
+    )
+    codigo = models.CharField(max_length=6)
+    estado = models.CharField(
+        max_length=10, choices=Estado.choices, default=Estado.GENERADO
+    )
     creado_en = models.DateTimeField(auto_now_add=True)
-    expira_en = models.DateTimeField()
-    intentos_fallidos = models.IntegerField(default=0)
-    es_valido = models.BooleanField(default=True)
+    vence_en = models.DateTimeField()
+    validado_en = models.DateTimeField(null=True, blank=True)  # fecha y hora de validación
+    intentos_fallidos = models.PositiveSmallIntegerField(default=0)
+    bloqueado_hasta = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        db_table = 'tokens_trabajo'
-        verbose_name = 'Token de Trabajo'
-        verbose_name_plural = 'Tokens de Trabajo'
+        ordering = ["-creado_en", "-id"]
+        constraints = [
+            # REGLA: un solo código vigente (generado) por trabajo.
+            models.UniqueConstraint(
+                fields=["trabajo"],
+                condition=Q(estado="generado"),
+                name="uniq_token_generado_por_trabajo",
+            ),
+            # REGLA: no hay dos códigos generados iguales al mismo tiempo.
+            models.UniqueConstraint(
+                fields=["codigo"],
+                condition=Q(estado="generado"),
+                name="uniq_codigo_generado",
+            ),
+        ]
 
-    def save(self, *args, **kwargs):
-        if not self.expira_en:
-            # Expira en 24 horas por defecto
-            self.expira_en = timezone.now() + timedelta(hours=24)
-        super().save(*args, **kwargs)
-
-    @property
-    def esta_expirado(self):
-        return timezone.now() > self.expira_en
-
-    def registrar_intento_fallido(self):
-        self.intentos_fallidos += 1
-        if self.intentos_fallidos >= 5:
-            self.es_valido = False
-        self.save(update_fields=['intentos_fallidos', 'es_valido'])
+    def __str__(self):
+        return f"Token #{self.pk} del trabajo #{self.trabajo_id} [{self.estado}]"
