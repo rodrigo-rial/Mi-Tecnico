@@ -1,68 +1,69 @@
-import { NavLink, useNavigate } from 'react-router-dom'
-
+import { useEffect, useId, useRef, useState } from 'react'
+import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { cerrarSesion } from '../../services/authApi'
 
-function LayoutPagina({
-  titulo,
-  descripcion,
-  enlaces = [],
-  conCerrarSesion = false,
-  children,
-}) {
+export default function LayoutPagina({ titulo, descripcion, enlaces = [], conCerrarSesion = true, children }) {
   const navigate = useNavigate()
+  const [abierto, setAbierto] = useState(false)
+  const menu = useRef(null)
+  const boton = useRef(null)
+  const menuId = useId()
 
-  function salir() {
-    cerrarSesion()
-    navigate('/login', { replace: true })
-  }
-
+  useEffect(() => {
+    if (!abierto) return
+    function cerrarFuera(event) {
+      if (!menu.current?.contains(event.target)) setAbierto(false)
+    }
+    function cerrarConEscape(event) {
+      if (event.key === 'Escape') {
+        setAbierto(false)
+        boton.current?.focus()
+      }
+    }
+    document.addEventListener('pointerdown', cerrarFuera)
+    document.addEventListener('keydown', cerrarConEscape)
+    return () => {
+      document.removeEventListener('pointerdown', cerrarFuera)
+      document.removeEventListener('keydown', cerrarConEscape)
+    }
+  }, [abierto])
+  const tecnico = enlaces.some(({ to }) => to === '/tecnico/solicitudes')
   return (
-    <main className="min-h-screen bg-canvas px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl space-y-6">
-        <header className="rounded-2xl bg-gradient-to-br from-brand to-brand-dark p-6 text-white shadow-sm sm:p-8">
-          <p className="text-sm font-semibold uppercase tracking-wider text-blue-100">
-            MiTécnico
-          </p>
-          <h1 className="mt-2 text-3xl font-bold sm:text-4xl">{titulo}</h1>
-          {descripcion && (
-            <p className="mt-2 max-w-2xl text-blue-100">{descripcion}</p>
-          )}
-
-          {(enlaces.length > 0 || conCerrarSesion) && (
-            <nav aria-label="Navegación principal" className="mt-5 flex flex-wrap gap-2">
-              {enlaces.map(({ to, texto, end }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  end={end}
-                  className={({ isActive }) =>
-                    `inline-flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
-                      isActive
-                        ? 'bg-white text-brand'
-                        : 'bg-white/15 text-white hover:bg-white/25'
-                    }`}
-                >
-                  {texto}
-                </NavLink>
-              ))}
-
-              {conCerrarSesion && (
-                <button
-                  type="button"
-                  onClick={salir}
-                  className="inline-flex min-h-11 items-center rounded-lg bg-white/15 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/25 sm:ml-auto"
-                >
-                  Cerrar sesión
-                </button>
-              )}
-            </nav>
-          )}
-        </header>
-
-        {children}
+    <div className="app-shell">
+      <a href="#contenido" className="sr-only focus:not-sr-only focus:p-4">Ir al contenido</a>
+      <header className="app-topbar">
+        <Link to={enlaces.length === 0 ? '/cuenta' : tecnico ? '/tecnico/solicitudes' : '/cliente/solicitudes'} className="app-logo">
+          <img src="/mitecnico-logo.png" alt="" className="brand-image" />MiTécnico
+        </Link>
+        <div className="account-menu" ref={menu} onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) setAbierto(false)
+        }}>
+          <button ref={boton} type="button" className="account-menu-trigger" aria-label="Menú de usuario" aria-expanded={abierto} aria-controls={menuId} onClick={() => setAbierto(!abierto)}>
+            <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m3 4.5 3 3 3-3" /></svg>
+          </button>
+          {abierto && <div id={menuId} className="account-menu-panel">
+            <Link to="/cuenta" onClick={() => setAbierto(false)}>Ver mi cuenta</Link>
+            {tecnico && <Link to="/tecnico" onClick={() => setAbierto(false)}>Mi perfil</Link>}
+            {conCerrarSesion && <button type="button" onClick={() => { cerrarSesion(); setAbierto(false); navigate('/login', { replace: true }) }}>Cerrar sesión</button>}
+          </div>}
+        </div>
+      </header>
+      <div className="app-body">
+        <div className="section-bar">
+          <nav aria-label="Navegación principal" className="app-navigation">
+            {enlaces.map(({ to, texto, end }) => (
+              <NavLink key={to} to={to} end={end} className={({ isActive }) => `app-nav-link ${isActive ? 'is-active' : ''}`}>
+                {texto}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+        <main id="contenido" className="app-content">
+          <header className="page-heading"><h1>{titulo}</h1>{descripcion && <p>{descripcion}</p>}</header>
+          <div className="space-y-6">{children}</div>
+        </main>
       </div>
-    </main>
+    </div>
   )
 }
-
-export default LayoutPagina

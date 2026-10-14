@@ -18,9 +18,6 @@ const FILTROS = [
   { valor: 'cancelada', texto: 'Canceladas' },
 ]
 
-const CLASE_BOTON_ENLACE =
-  'mt-button inline-flex items-center justify-center'
-
 function SolicitudesClientePage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -30,6 +27,7 @@ function SolicitudesClientePage() {
   const [error, setError] = useState('')
   const [intento, setIntento] = useState(0)
   const [filtro, setFiltro] = useState('')
+  const [busqueda, setBusqueda] = useState('')
   const [aviso] = useState(location.state?.mensaje ?? '')
 
   // El aviso viene en el estado de la navegación: se limpia para que no
@@ -72,9 +70,10 @@ function SolicitudesClientePage() {
     setIntento((valor) => valor + 1)
   }
 
-  const visibles = filtro
-    ? solicitudes.filter((solicitud) => solicitud.estado === filtro)
-    : solicitudes
+  const normalizar = (valor) => (valor ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  const visibles = solicitudes.filter((solicitud) =>
+    (!filtro || solicitud.estado === filtro) &&
+    normalizar([solicitud.titulo, solicitud.especialidad_nombre, solicitud.zona_nombre].join(' ')).includes(normalizar(busqueda.trim())))
 
   return (
     <LayoutPagina
@@ -82,6 +81,9 @@ function SolicitudesClientePage() {
       descripcion="Seguí el estado de los servicios que publicaste."
       enlaces={ENLACES_CLIENTE}
     >
+      <div className="client-action-row"><Link className="mt-button inline-flex items-center gap-3" to="/cliente/solicitudes/nueva"><span aria-hidden="true">+</span> Nueva solicitud</Link></div>
+      {!cargando && !error && <div className="activity-summary" aria-label="Resumen de solicitudes">{[{ valor: 'publicada', texto: 'Esperando propuestas' }, { valor: 'asignada', texto: 'Servicios coordinados' }, { valor: 'finalizada', texto: 'Solicitudes finalizadas' }].map(({ valor, texto }) => <button key={valor} type="button" aria-pressed={filtro === valor} onClick={() => setFiltro(valor)} className={filtro === valor ? 'summary-active' : ''}><strong>{solicitudes.filter((solicitud) => solicitud.estado === valor).length}</strong><span>{texto}</span><span aria-hidden="true">↗</span></button>)}</div>}
+      <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-bold">Solicitudes</h2><Link className="text-brand text-sm font-semibold" to="/trabajos">Ver servicios contratados →</Link></div>
       {aviso && (
         <p role="status" className="rounded-lg bg-emerald-100 p-3 text-sm font-medium text-emerald-800">
           {aviso}
@@ -103,15 +105,12 @@ function SolicitudesClientePage() {
         <EstadoVacio
           titulo="Todavía no publicaste solicitudes"
           descripcion="Publicá la primera y recibí propuestas de técnicos verificados."
-        >
-          <Link to="/cliente/solicitudes/nueva" className={CLASE_BOTON_ENLACE}>
-            Publicar solicitud
-          </Link>
-        </EstadoVacio>
+        />
       )}
 
       {!cargando && !error && solicitudes.length > 0 && (
         <>
+          <label className="block text-sm font-medium">Buscar en mis solicitudes<input type="search" className="mt-input" placeholder="Por título, servicio o zona" value={busqueda} onChange={(event) => setBusqueda(event.target.value)} /></label>
           <div role="group" aria-label="Filtrar por estado" className="flex flex-wrap gap-2">
             {FILTROS.map(({ valor, texto }) => (
               <button
@@ -132,11 +131,11 @@ function SolicitudesClientePage() {
 
           {visibles.length === 0 ? (
             <EstadoVacio
-              titulo="No hay solicitudes con ese estado"
-              descripcion="Probá con otro filtro."
+              titulo="No encontramos solicitudes con esos filtros"
+              descripcion="Probá con otro estado o cambiá el texto de búsqueda."
             />
           ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 xl:grid-cols-2">
               {visibles.map((solicitud) => (
                 <SolicitudCard key={solicitud.id} solicitud={solicitud} />
               ))}

@@ -1,157 +1,27 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import LayoutPagina from '../components/comunes/LayoutPagina'
+import { useUsuarioActual } from '../hooks/useUsuarioActual'
+import { enlacesPorRol } from '../utils/navegacion'
 
-import {
-  cerrarSesion,
-  obtenerSesionActual,
-} from '../services/authApi'
-
-function CuentaPage() {
-  const navigate = useNavigate()
-
-  const [usuario, setUsuario] = useState(null)
-  const [cargando, setCargando] = useState(true)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    let componenteActivo = true
-
-    async function cargarSesion() {
-      try {
-        const usuarioActual = await obtenerSesionActual()
-
-        if (!componenteActivo) {
-          return
-        }
-
-        if (!usuarioActual) {
-          navigate('/login', { replace: true })
-          return
-        }
-
-        setUsuario(usuarioActual)
-      } catch (errorSesion) {
-        if (componenteActivo) {
-          setError(errorSesion.message)
-        }
-      } finally {
-        if (componenteActivo) {
-          setCargando(false)
-        }
-      }
-    }
-
-    cargarSesion()
-
-    return () => {
-      componenteActivo = false
-    }
-  }, [navigate])
-
-  function manejarCierreSesion() {
-    cerrarSesion()
-    navigate('/login', { replace: true })
-  }
-
-  if (cargando) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-100">
-        <p className="text-slate-600">
-          Comprobando sesión...
-        </p>
-      </main>
-    )
-  }
-
-  if (error) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
-        <section className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
-          <p className="rounded-lg bg-red-100 p-3 text-red-700">
-            {error}
-          </p>
-
-          <button
-            type="button"
-            onClick={manejarCierreSesion}
-            className="mt-5 rounded-lg bg-blue-700 px-4 py-2 font-semibold text-white hover:bg-blue-800"
-          >
-            Volver al inicio de sesión
-          </button>
-        </section>
-      </main>
-    )
-  }
-
-  if (!usuario) {
-    return null
-  }
-
+export default function CuentaPage() {
+  const { usuario, cargando } = useUsuarioActual()
+  const tecnico = usuario?.rol === 'TECNICO'
+  const nombre = [usuario?.first_name, usuario?.last_name].filter(Boolean).join(' ') || usuario?.username || 'Mi cuenta'
+  const rol = { CLIENTE: 'Cliente', TECNICO: 'Técnico', ADMINISTRADOR: 'Administrador' }[usuario?.rol]
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
-      <section className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-lg">
-        <header className="mb-6">
-          <p className="font-semibold text-blue-700">
-            MiTécnico
-          </p>
-
-          <h1 className="mt-2 text-3xl font-bold text-slate-800">
-            Mi cuenta
-          </h1>
-        </header>
-
-        <div className="grid gap-4">
-          <div className="rounded-lg bg-slate-100 p-4">
-            <p className="text-sm text-slate-500">
-              Nombre completo
-            </p>
-
-            <p className="font-semibold text-slate-800">
-              {usuario.first_name} {usuario.last_name}
-            </p>
-          </div>
-
-          <div className="rounded-lg bg-slate-100 p-4">
-            <p className="text-sm text-slate-500">
-              Nombre de usuario
-            </p>
-
-            <p className="font-semibold text-slate-800">
-              {usuario.username}
-            </p>
-          </div>
-
-          <div className="rounded-lg bg-slate-100 p-4">
-            <p className="text-sm text-slate-500">
-              Correo electrónico
-            </p>
-
-            <p className="font-semibold text-slate-800">
-              {usuario.email}
-            </p>
-          </div>
-
-          <div className="rounded-lg bg-slate-100 p-4">
-            <p className="text-sm text-slate-500">
-              Rol
-            </p>
-
-            <p className="font-semibold text-slate-800">
-              {usuario.rol}
-            </p>
-          </div>
+    <LayoutPagina titulo="Mi cuenta" descripcion="Tu información personal, en un solo lugar." enlaces={enlacesPorRol(usuario?.rol)}>
+      {cargando ? <p role="status">Cargando tu cuenta…</p> : !usuario ? <div role="alert" className="mt-card">No pudimos cargar tu cuenta. <Link className="text-brand underline" to="/login">Volver a iniciar sesión</Link></div> : <>
+        <section className="profile-cover"><div className="profile-cover-art" aria-hidden="true"/><div className="profile-identity"><div className="profile-avatar" aria-hidden="true">{nombre.slice(0, 1).toUpperCase()}</div><div className="min-w-0"><p className="eyebrow">TU PERFIL</p><h2 className="break-words">{nombre}</h2><p className="text-slate-500 break-all">@{usuario.username}</p></div><span className="role-pill">{rol}</span></div></section>
+        <div className="profile-columns">
+          <section className="mt-card"><p className="eyebrow">INFORMACIÓN PERSONAL</p><h2 className="text-xl font-bold mt-2">Los datos de tu cuenta</h2><dl className="account-fields">
+            <div><dt>Nombre completo</dt><dd>{[usuario.first_name, usuario.last_name].filter(Boolean).join(' ') || 'No informado'}</dd></div>
+            <div><dt>Nombre de usuario</dt><dd>@{usuario.username}</dd></div>
+            <div><dt>Correo electrónico</dt><dd>{usuario.email || 'No informado'}</dd></div>
+            <div><dt>Tipo de cuenta</dt><dd>{rol}</dd></div>
+          </dl></section>
+          <aside className="space-y-4"><section className="mt-card"><h2 className="font-bold text-lg">{tecnico ? 'Tu espacio profesional' : 'Todo a mano'}</h2><p className="text-sm text-slate-500 mt-2">{tecnico ? 'Gestioná tu presentación, servicios y zonas de cobertura.' : 'Consultá tus pedidos y seguí los servicios que ya coordinaste.'}</p>{usuario.rol !== 'ADMINISTRADOR' && <Link className="quick-link" to={tecnico ? '/tecnico' : '/cliente/solicitudes'}>{tecnico ? 'Ver mi perfil profesional' : 'Ver mis solicitudes'} <span aria-hidden="true">→</span></Link>}{usuario.rol !== 'ADMINISTRADOR' && <Link className="quick-link" to="/trabajos">{tecnico ? 'Mis trabajos' : 'Servicios contratados'} <span aria-hidden="true">→</span></Link>}</section></aside>
         </div>
-
-        <button
-          type="button"
-          onClick={manejarCierreSesion}
-          className="mt-6 w-full rounded-lg bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700"
-        >
-          Cerrar sesión
-        </button>
-      </section>
-    </main>
+      </>}
+    </LayoutPagina>
   )
 }
-
-export default CuentaPage

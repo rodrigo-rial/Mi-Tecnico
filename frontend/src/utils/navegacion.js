@@ -1,15 +1,12 @@
 export const ENLACES_CLIENTE = [
-  { to: '/cliente/solicitudes', texto: 'Mis solicitudes', end: true },
-  { to: '/cliente/solicitudes/nueva', texto: 'Nueva solicitud' },
-  { to: '/trabajos', texto: 'Mis trabajos' },
-  { to: '/cuenta', texto: 'Mi cuenta' },
+  { to: '/cliente/solicitudes', texto: 'Solicitudes', end: true },
+  { to: '/trabajos', texto: 'Servicios contratados' },
 ]
 
 export const ENLACES_TECNICO = [
   { to: '/tecnico/solicitudes', texto: 'Solicitudes' },
   { to: '/tecnico/propuestas', texto: 'Mis propuestas' },
   { to: '/trabajos', texto: 'Mis trabajos' },
-  { to: '/tecnico', texto: 'Mi perfil', end: true },
 ]
 
 /** Menú de navegación según el rol (vacío mientras no se conoce). */

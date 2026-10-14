@@ -108,7 +108,7 @@ function TrabajoDetallePage() {
       titulo="Seguimiento del trabajo"
       descripcion="Mirá en qué etapa está el servicio."
       enlaces={enlacesPorRol(rol)}
-      conCerrarSesion={rol === 'TECNICO'}
+      conCerrarSesion
     >
       <p>
         <Link to={RUTA_TRABAJOS} className="text-sm font-semibold text-brand hover:underline">

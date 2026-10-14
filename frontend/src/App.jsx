@@ -38,7 +38,7 @@ function App() {
       <Route
         element={(
           <RutaProtegida
-            rolesPermitidos={['CLIENTE', 'ADMINISTRADOR']}
+            rolesPermitidos={['CLIENTE', 'TECNICO', 'ADMINISTRADOR']}
           />
         )}
       >
