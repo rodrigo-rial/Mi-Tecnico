@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { obtenerToken } from "../../services/tokenService";
-import { mensajeDeError } from "../../utils/mensajesApi";
+import { mensajeError } from "../../utils/errores";
 import CodigoSeguridadTecnico from "../../components/token/CodigoSeguridadTecnico";
 import FormularioValidarCodigo from "../../components/token/FormularioValidarCodigo";
 
@@ -16,7 +16,7 @@ export default function CodigoSeguridadPage() {
       setError("");
       setDatos(await obtenerToken(trabajoId));
     } catch (e) {
-      setError(mensajeDeError(e));
+      setError(mensajeError(e));
     }
   }, [trabajoId]);
 

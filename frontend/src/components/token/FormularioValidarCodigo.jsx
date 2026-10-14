@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { validarToken } from "../../services/tokenService";
-import { mensajeDeError } from "../../utils/mensajesApi";
+import { mensajeError } from '../../utils/errores';
 
 export default function FormularioValidarCodigo({ trabajoId, onValidado }) {
   const [codigo, setCodigo] = useState("");
@@ -23,10 +23,10 @@ export default function FormularioValidarCodigo({ trabajoId, onValidado }) {
     setEnviando(true);
     try {
       const datos = await validarToken(trabajoId, codigo);
-      onValidado(datos);
+      onValidado?.(datos);
     } catch (e) {
       // Acá llegan: código incorrecto (con intentos restantes), vencido, usado y bloqueo.
-      setError(mensajeDeError(e));
+      setError(mensajeError(e));
       setCodigo("");
     } finally {
       setEnviando(false);
