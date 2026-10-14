@@ -107,8 +107,10 @@ def cambiar_estado_trabajo(trabajo, usuario, nuevo_estado):
             f"Un {rol.upper()} no puede pasar el trabajo a '{nuevo.value}'."
         )
 
-    # TODO (Integrante 4): para pasar a EN_PROCESO se puede exigir acá que
-    # el token de la visita esté validado.
+    if nuevo == Trabajo.Estado.EN_PROCESO:
+        raise ValidationError(
+            "El trabajo comienza cuando el cliente valida el código de seguridad."
+        )
     trabajo.cambiar_estado(nuevo)  # valida la transición
 
     solicitud = trabajo.solicitud

@@ -14,8 +14,8 @@ export default function CodigoSeguridadTecnico({ trabajoId, token: tokenProp, on
   const cargarToken = useCallback(async () => {
     if (tokenProp) return; // Si ya viene por prop, no hace falta buscarlo
     try {
-      setError("");
       const datos = await obtenerToken(trabajoId);
+      setError("");
       setTokenInterno(datos.token);
     } catch (e) {
       setError(mensajeError(e));
@@ -23,10 +23,13 @@ export default function CodigoSeguridadTecnico({ trabajoId, token: tokenProp, on
   }, [trabajoId, tokenProp]);
 
   useEffect(() => {
-    if (!tokenProp) {
-      cargarToken();
-    }
-  }, [cargarToken, tokenProp]);
+    if (tokenProp) return;
+    let activo = true;
+    obtenerToken(trabajoId).then((datos) => {
+      if (activo) { setTokenInterno(datos.token); setError(""); }
+    }).catch((e) => { if (activo) setError(mensajeError(e)); });
+    return () => { activo = false; };
+  }, [trabajoId, tokenProp]);
 
   const tokenActual = tokenProp || tokenInterno;
   const handleCambio = onCambioProp || cargarToken;
@@ -42,6 +45,10 @@ export default function CodigoSeguridadTecnico({ trabajoId, token: tokenProp, on
     } finally {
       setRegenerando(false);
     }
+  }
+
+  if (!tokenActual && error) {
+    return <div role="alert" className="space-y-3"><p>{error}</p><button type="button" className="mt-button" onClick={cargarToken}>Reintentar</button></div>;
   }
 
   if (!tokenActual) {

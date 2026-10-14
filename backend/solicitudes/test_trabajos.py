@@ -262,10 +262,23 @@ class TrabajoAPITests(EscenarioBase, APITestCase):
         res = self.client.get(reverse("trabajo-detail", kwargs={"pk": self.trabajo.pk}))
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_flujo_completo_tecnico(self):
-        res = self.cambiar(self.tecnico1, "en_proceso")
+    def validar_visita(self):
+        from tokens.models import TokenTrabajo
+        token = TokenTrabajo.objects.get(trabajo=self.trabajo)
+        self.client.force_authenticate(self.cliente)
+        res = self.client.post(reverse("token-validar", args=[self.trabajo.pk]),
+                               {"codigo": token.codigo}, format="json")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data["estado"], "en_proceso")
+        self.assertEqual(res.data["trabajo_estado"], "en_proceso")
+
+    def test_tecnico_no_puede_iniciar_sin_codigo(self):
+        res = self.cambiar(self.tecnico1, "en_proceso")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.trabajo.refresh_from_db()
+        self.assertEqual(self.trabajo.estado, Trabajo.Estado.PENDIENTE)
+
+    def test_flujo_completo_tecnico(self):
+        self.validar_visita()
 
         res = self.cambiar(self.tecnico1, "finalizado")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -305,7 +318,7 @@ class TrabajoAPITests(EscenarioBase, APITestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_no_se_cancela_un_trabajo_finalizado(self):
-        self.cambiar(self.tecnico1, "en_proceso")
+        self.validar_visita()
         self.cambiar(self.tecnico1, "finalizado")
         res = self.cambiar(self.cliente, "cancelado")
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

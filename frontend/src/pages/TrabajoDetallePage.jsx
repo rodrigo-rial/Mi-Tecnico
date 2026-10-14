@@ -19,6 +19,7 @@ import {
 } from '../utils/navegacion'
 import { accionesDisponibles, armarPasos } from '../utils/trabajos'
 import CodigoSeguridadTecnico from '../components/token/CodigoSeguridadTecnico'
+import FormularioValidarCodigo from '../components/token/FormularioValidarCodigo'
 
 
 const CLASE_BOTON_ENLACE = 'mt-button inline-flex items-center justify-center'
@@ -202,6 +203,17 @@ function TrabajoDetallePage() {
             )}
 
 
+            {rol === 'CLIENTE' && trabajo.estado === 'pendiente' && (
+              <div className="mt-4 border-t border-slate-200 pt-4">
+                <FormularioValidarCodigo trabajoId={id} onValidado={() => {
+                  setAviso('Código validado. El trabajo está en proceso.')
+                  reintentar()
+                }} />
+              </div>
+            )}
+            {rol === 'TECNICO' && trabajo.estado === 'pendiente' && (
+              <button type="button" className="mt-button" onClick={reintentar}>Actualizar estado</button>
+            )}
             {rol === 'CLIENTE' && (
               <p>
                 <Link
