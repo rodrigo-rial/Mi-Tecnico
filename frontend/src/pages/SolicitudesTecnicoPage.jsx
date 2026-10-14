@@ -1,3 +1,4 @@
+import DisponibilidadUrgencias from '../components/tecnicos/DisponibilidadUrgencias'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -101,6 +102,7 @@ function SolicitudesTecnicoPage() {
       enlaces={ENLACES_TECNICO}
       conCerrarSesion
     >
+      <DisponibilidadUrgencias />
       <AvisoVerificacion estado={estado} />
 
       {aviso && (

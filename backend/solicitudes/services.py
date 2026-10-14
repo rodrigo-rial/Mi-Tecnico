@@ -20,11 +20,15 @@ def aceptar_propuesta(propuesta, usuario):
     - La solicitud pasa a 'asignada'.
     - Se crea el Trabajo con el precio de la propuesta.
     """
+    from urgencias.services import bloquear_asignaciones
+    bloquear_asignaciones()
     # Se bloquea la solicitud: si dos aceptaciones llegan a la vez, la
     # segunda espera y después ve la solicitud ya asignada.
     solicitud = Solicitud.objects.select_for_update().get(pk=propuesta.solicitud_id)
     propuesta = Propuesta.objects.select_related("tecnico").get(pk=propuesta.pk)
 
+    if Trabajo.objects.filter(tecnico_id=propuesta.tecnico_id, estado__in=["pendiente", "en_proceso"], asignacion_urgente__isnull=False).exists():
+        raise ValidationError("El técnico está atendiendo una urgencia. Elegí otra propuesta.")
     if not solicitud.es_propietario(usuario):
         raise PermissionDenied("Solo el dueño de la solicitud puede aceptar propuestas.")
     if solicitud.estado != Solicitud.Estado.PUBLICADA:
@@ -86,6 +90,8 @@ def cambiar_estado_trabajo(trabajo, usuario, nuevo_estado):
     Mantiene sincronizada la solicitud: finalizado -> 'finalizada',
     cancelado -> 'cancelada'.
     """
+    from urgencias.services import bloquear_asignaciones, actualizar_por_trabajo
+    bloquear_asignaciones()
     trabajo = (
         Trabajo.objects.select_for_update().select_related("solicitud").get(pk=trabajo.pk)
     )
@@ -121,4 +127,5 @@ def cambiar_estado_trabajo(trabajo, usuario, nuevo_estado):
         solicitud.estado = Solicitud.Estado.CANCELADA
         solicitud.save(update_fields=["estado"])
 
+    actualizar_por_trabajo(trabajo, usuario)
     return trabajo

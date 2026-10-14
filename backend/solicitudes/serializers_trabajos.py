@@ -15,10 +15,17 @@ class TrabajoSerializer(serializers.ModelSerializer):
     tecnico_nombre = serializers.ReadOnlyField(source="tecnico.get_full_name")
     tecnico_username = serializers.ReadOnlyField(source="tecnico.username")
 
+    urgencia_id = serializers.SerializerMethodField()
+
+    def get_urgencia_id(self, obj):
+        asignacion = getattr(obj, "asignacion_urgente", None)
+        return asignacion.urgencia_id if asignacion else None
+
     class Meta:
         model = Trabajo
         fields = [
             "id",
+            "urgencia_id",
             "solicitud",
             "solicitud_titulo",
             "solicitud_descripcion",

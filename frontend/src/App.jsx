@@ -4,6 +4,7 @@ import {
   Routes,
 } from 'react-router-dom'
 
+import UrgenciasPage from './pages/UrgenciasPage'
 import LoginPage from './pages/LoginPage'
 import RegistroPage from './pages/RegistroPage'
 import CuentaPage from './pages/CuentaPage'
@@ -56,6 +57,10 @@ function App() {
         <Route
           path="/cliente/solicitudes"
           element={<SolicitudesClientePage />}
+        />
+        <Route
+          path="/cliente/urgencias"
+          element={<UrgenciasPage />}
         />
         <Route
           path="/cliente/solicitudes/nueva"

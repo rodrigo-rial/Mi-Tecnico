@@ -45,6 +45,19 @@ services:
       db:
         condition: service_healthy
 
+  urgencias_worker:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    command: python manage.py procesar_urgencias
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
   frontend:
     build:
       context: ./frontend

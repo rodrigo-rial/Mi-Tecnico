@@ -155,3 +155,14 @@
 .account-menu-panel a, .account-menu-panel button { display: block; width: 100%; padding: 12px; text-align: left; font-size: 14px; border-radius: 8px; cursor: pointer; }
 .account-menu-panel a:hover, .account-menu-panel button:hover { background: #f0f5fc; }
 .account-menu-panel button { color: #b42318; }
+
+.availability-control { display: flex; align-items: center; gap: 12px; }
+.availability-label { font-size: 14px; font-weight: 600; }
+.availability-switch { position: relative; width: 60px; height: 34px; margin-block: 5px; flex-shrink: 0; border: 2px solid #64748b; border-radius: 999px; background: #64748b; cursor: pointer; transition: background-color .18s, border-color .18s; }
+.availability-switch::after { content: ''; position: absolute; inset: -7px -2px; }
+.availability-thumb { position: absolute; width: 26px; height: 26px; left: 2px; top: 2px; border-radius: 50%; background: white; box-shadow: 0 1px 3px #0003; transition: transform .18s; }
+.availability-switch[aria-checked="true"] { background: #1a73e8; border-color: #1a73e8; }
+.availability-switch[aria-checked="true"] .availability-thumb { transform: translateX(26px); }
+.availability-switch:focus-visible { outline: 3px solid #1a73e8; outline-offset: 4px; }
+.availability-switch:disabled { opacity: .5; cursor: not-allowed; }
+@media (prefers-reduced-motion: reduce) { .availability-switch, .availability-thumb { transition: none; } }

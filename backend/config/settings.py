@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "tecnicos",
     "solicitudes",
     "tokens",
+    "urgencias",
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
