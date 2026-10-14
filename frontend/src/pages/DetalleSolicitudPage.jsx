@@ -23,6 +23,8 @@ import {
   RUTA_SOLICITUDES_CLIENTE,
   rutaTrabajo,
 } from '../utils/navegacion'
+import FormularioValidarCodigo from '../components/token/FormularioValidarCodigo'
+
 
 const CLASE_BOTON_ENLACE = 'mt-button inline-flex items-center justify-center'
 const ORDEN_ESTADO = { aceptada: 0, pendiente: 1, rechazada: 2 }
@@ -41,8 +43,6 @@ async function pedirDatos(id) {
     listarPropuestasDeSolicitud(id),
   ])
 
-  // El trabajo solo existe una vez asignada la solicitud. Si no se puede
-  // consultar, la pantalla sigue funcionando sin esa tarjeta.
   let trabajo = null
   if (solicitud.estado !== 'publicada') {
     try {
@@ -171,7 +171,19 @@ function DetalleSolicitudPage() {
       setProcesando(false)
     }
 
-    // Se vuelve a pedir todo: el estado pudo cambiar con la acción o por otro lado.
+    try {
+      setDatos(await pedirDatos(id))
+    } catch {
+      /* se conservan los datos que ya estaban en pantalla */
+    }
+  }
+
+  // ==========================================
+  // PASO 1: Agregamos la función acá adentro
+  // ==========================================
+  async function alValidarCodigo() {
+    setErrorAccion('')
+    setAviso('Código correcto. La visita del técnico quedó confirmada.')
     try {
       setDatos(await pedirDatos(id))
     } catch {
@@ -268,6 +280,16 @@ function DetalleSolicitudPage() {
               <p className="text-sm text-slate-600">
                 El pago se acuerda directamente con el técnico, fuera de MiTécnico.
               </p>
+
+              {/* ========================================== */}
+              {/* PASO 2: Le pasamos onValidado={alValidarCodigo} */}
+              {/* ========================================== */}
+              <div className="mt-4 border-t border-slate-200 pt-4">
+                <FormularioValidarCodigo 
+                  trabajoId={datos.trabajo.id} 
+                  onValidado={alValidarCodigo} 
+                />
+              </div>
 
               <Link to={rutaTrabajo(datos.trabajo.id)} className={CLASE_BOTON_ENLACE}>
                 Ver seguimiento del trabajo

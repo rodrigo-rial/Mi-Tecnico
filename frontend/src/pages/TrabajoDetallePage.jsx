@@ -18,6 +18,8 @@ import {
   rutaDetalleSolicitud,
 } from '../utils/navegacion'
 import { accionesDisponibles, armarPasos } from '../utils/trabajos'
+import CodigoSeguridadTecnico from '../components/token/CodigoSeguridadTecnico'
+
 
 const CLASE_BOTON_ENLACE = 'mt-button inline-flex items-center justify-center'
 
@@ -191,6 +193,14 @@ function TrabajoDetallePage() {
             <p className="text-sm text-slate-600">
               El pago se acuerda directamente entre las partes, fuera de MiTécnico.
             </p>
+
+            {/* CÓDIGO DE SEGURIDAD PARA EL TÉCNICO */}
+            {rol === 'TECNICO' && (trabajo.estado === 'pendiente' || trabajo.estado === 'en_proceso') && (
+              <div className="mt-4 border-t border-slate-200 pt-4">
+                <CodigoSeguridadTecnico trabajoId={id} /> 
+              </div>
+            )}
+
 
             {rol === 'CLIENTE' && (
               <p>
