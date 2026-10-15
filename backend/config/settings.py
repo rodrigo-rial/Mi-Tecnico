@@ -44,7 +44,9 @@ INSTALLED_APPS = [
     "tecnicos",
     "solicitudes",
     "tokens",
+    "reputacion",
 ]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
