@@ -43,7 +43,10 @@ INSTALLED_APPS = [
     "usuarios",
     "tecnicos",
     "solicitudes",
+<<<<<<< HEAD
     "tokens",
+=======
+>>>>>>> 5ed7080eaf069d6f17c85e77305d00f8c13c7308
     "reputacion",
 ]
 MIDDLEWARE = [
