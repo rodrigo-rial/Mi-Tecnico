@@ -19,12 +19,8 @@ import {
 } from '../utils/navegacion'
 import { accionesDisponibles, armarPasos } from '../utils/trabajos'
 import CodigoSeguridadTecnico from '../components/token/CodigoSeguridadTecnico'
-<<<<<<< HEAD
 import FormularioValidarCodigo from '../components/token/FormularioValidarCodigo'
-
-=======
 import PanelReputacionTrabajo from '../components/reputacion/PanelReputacionTrabajo'
->>>>>>> origin/feature/reputacion-frontend-v2
 
 const CLASE_BOTON_ENLACE = 'mt-button inline-flex items-center justify-center'
 

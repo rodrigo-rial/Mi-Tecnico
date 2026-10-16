@@ -176,3 +176,38 @@ class PruebasFotos(BaseReputacion):
         r = self.client.get(f"/api/tecnicos/{self.tecnico.id}/fotos/")
         self.assertEqual(r.status_code, 200)
         self.assertEqual(len(r.data), 1)
+
+class ArchivosPublicosIntegracionTests(TestCase):
+    """Las fotos del historial no deben publicar los documentos privados."""
+
+    def test_rutas_publicas_limitadas_a_fotos(self):
+        import importlib
+        from pathlib import Path
+        from django.core.exceptions import SuspiciousFileOperation
+        from django.test import RequestFactory
+        from django.urls import Resolver404, clear_url_caches, resolve
+        import config.urls
+
+        with tempfile.TemporaryDirectory() as directorio:
+            raiz = Path(directorio)
+            (raiz / "trabajos").mkdir()
+            (raiz / "tecnicos").mkdir()
+            (raiz / "trabajos" / "ejemplo.png").write_bytes(b"foto de prueba")
+            (raiz / "tecnicos" / "dni.pdf").write_bytes(b"documento privado")
+            try:
+                with override_settings(DEBUG=True, MEDIA_ROOT=raiz):
+                    importlib.reload(config.urls)
+                    clear_url_caches()
+                    ruta = resolve("/media/trabajos/ejemplo.png")
+                    respuesta = ruta.func(RequestFactory().get("/media/trabajos/ejemplo.png"), **ruta.kwargs)
+                    try:
+                        self.assertEqual(b"".join(respuesta.streaming_content), b"foto de prueba")
+                    finally:
+                        respuesta.close()
+                    with self.assertRaises(Resolver404):
+                        resolve("/media/tecnicos/dni.pdf")
+                    with self.assertRaises(SuspiciousFileOperation):
+                        ruta.func(RequestFactory().get("/"), path="../tecnicos/dni.pdf", document_root=raiz / "trabajos")
+            finally:
+                importlib.reload(config.urls)
+                clear_url_caches()

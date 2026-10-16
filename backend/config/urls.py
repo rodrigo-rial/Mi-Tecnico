@@ -19,8 +19,8 @@ urlpatterns = [
     path("api/", include("reputacion.urls")),
 ]
 
-# Solo las fotos del historial son públicas; los documentos técnicos
-# continúan accesibles exclusivamente por las descargas del administrador.
+# Solo las fotos del historial son pÃºblicas; los documentos tÃ©cnicos
+# continÃºan accesibles exclusivamente por las descargas del administrador.
 if settings.DEBUG:
     urlpatterns += static(
         settings.MEDIA_URL + "trabajos/",

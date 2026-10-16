@@ -20,18 +20,31 @@ export default function PanelReputacionTrabajo({ trabajo, usuarioId }) {
   const [fotos, setFotos] = useState([]);
   const [error, setError] = useState("");
 
-  const recargar = useCallback(async () => {
-    try {
-      setCalificaciones(await listarCalificacionesDeTrabajo(trabajo.id));
-      setFotos(await listarFotosDeTrabajo(trabajo.id));
-    } catch (e) {
-      setError(e.message);
-    }
-  }, [trabajo.id]);
+  const cargar = useCallback(() => Promise.all([
+    listarCalificacionesDeTrabajo(trabajo.id),
+    listarFotosDeTrabajo(trabajo.id),
+  ]), [trabajo.id]);
+
+  function aplicar([nuevasCalificaciones, nuevasFotos]) {
+    setCalificaciones(nuevasCalificaciones);
+    setFotos(nuevasFotos);
+    setError("");
+  }
+
+  function recargar() {
+    return cargar().then(aplicar).catch((e) => setError(e.message));
+  }
 
   useEffect(() => {
-    if (finalizado && (esCliente || esTecnico)) recargar();
-  }, [finalizado, esCliente, esTecnico, recargar]);
+    if (!finalizado || (!esCliente && !esTecnico)) return;
+    let activo = true;
+    cargar().then((datos) => {
+      if (activo) aplicar(datos);
+    }).catch((e) => {
+      if (activo) setError(e.message);
+    });
+    return () => { activo = false; };
+  }, [finalizado, esCliente, esTecnico, cargar]);
 
   // Solo participantes ven este panel
   if (!esCliente && !esTecnico) return null;

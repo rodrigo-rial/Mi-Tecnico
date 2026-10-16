@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-// SUPUESTO: módulo de auth de Int. 1 con useAuth() que devuelve { usuario } y usuario.id
-import { useAuth } from "../../auth/AuthContext";
+// SUPUESTO: módulo de auth de Int. 1 con useUsuarioActual() que devuelve { usuario } y usuario.id
+import { useUsuarioActual } from "../../hooks/useUsuarioActual";
 import PanelReputacionTrabajo from "../../components/reputacion/PanelReputacionTrabajo";
-import { obtenerTrabajo } from "../../services/reputacionService";
+import { obtenerTrabajo } from "../../services/trabajosApi";
 
 export default function ReputacionTrabajoPage() {
   const { trabajoId } = useParams();
-  const { usuario } = useAuth();
+  const { usuario } = useUsuarioActual();
   const [trabajo, setTrabajo] = useState(null);
   const [error, setError] = useState("");
 
@@ -20,7 +20,7 @@ export default function ReputacionTrabajoPage() {
       <h1 className="mb-4 text-2xl font-bold text-[#364152]">Trabajo #{trabajoId}</h1>
       {error && <p role="alert" className="text-[#ef4444]">{error}</p>}
       {!trabajo && !error && <p>Cargando…</p>}
-      {trabajo && <PanelReputacionTrabajo trabajo={trabajo} usuarioId={usuario.id} />}
+      {trabajo && usuario && <PanelReputacionTrabajo trabajo={trabajo} usuarioId={usuario.id} />}
     </main>
   );
 }
