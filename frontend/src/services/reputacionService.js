@@ -1,58 +1,51 @@
-import { mensajeDeError } from "../utils/reputacion";
+import { obtenerAccessToken } from './authApi'
+import { extraerLista, solicitarAutenticado } from './http'
+import { mensajeDeError } from '../utils/reputacion'
 
-// ===== ADAPTADOR (SUPUESTO) =====
-// Cambiar SOLO este bloque si el módulo de auth de Int. 1 se llama distinto.
-// Si Int. 1 ya tiene un cliente de API (con refresh de token), reemplazá la
-// función "pedir" por el suyo.
-import { obtenerTokenAcceso } from "../auth/tokenStorage";
-const URL_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
-// ================================
+const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api')
+  .replace(/\/$/, '')
 
-async function pedir(ruta, { metodo = "GET", cuerpo, esArchivo = false } = {}) {
-  const encabezados = { Authorization: `Bearer ${obtenerTokenAcceso()}` };
-  // Con archivos NO se pone Content-Type: el navegador arma el multipart solo.
-  if (cuerpo && !esArchivo) encabezados["Content-Type"] = "application/json";
-
-  const respuesta = await fetch(`${URL_BASE}/api${ruta}`, {
-    method: metodo,
-    headers: encabezados,
-    body: cuerpo ? (esArchivo ? cuerpo : JSON.stringify(cuerpo)) : undefined,
-  });
-  const datos = await respuesta.json().catch(() => null);
-  if (!respuesta.ok) {
-    const error = new Error(mensajeDeError(datos));
-    error.estado = respuesta.status;
-    throw error;
-  }
-  return datos;
+// solicitarAutenticado ya renueva la sesión y lanza Error con .status y .message
+export function crearCalificacion({ trabajo, puntaje, comentario }) {
+  return solicitarAutenticado('/calificaciones/', {
+    method: 'POST',
+    datos: { trabajo, puntaje, comentario },
+  })
 }
-
-export const crearCalificacion = ({ trabajo, puntaje, comentario }) =>
-  pedir("/calificaciones/", { metodo: "POST", cuerpo: { trabajo, puntaje, comentario } });
 
 export const listarCalificacionesDeTrabajo = (trabajoId) =>
-  pedir(`/trabajos/${trabajoId}/calificaciones/`);
+  solicitarAutenticado(`/trabajos/${trabajoId}/calificaciones/`).then(extraerLista)
 
 export const obtenerReputacion = (usuarioId) =>
-  pedir(`/usuarios/${usuarioId}/reputacion/`);
+  solicitarAutenticado(`/usuarios/${usuarioId}/reputacion/`)
 
 export const listarFotosDeTrabajo = (trabajoId) =>
-  pedir(`/trabajos/${trabajoId}/fotos/`);
+  solicitarAutenticado(`/trabajos/${trabajoId}/fotos/`).then(extraerLista)
 
 export const listarFotosDeTecnico = (tecnicoId) =>
-  pedir(`/tecnicos/${tecnicoId}/fotos/`);
+  solicitarAutenticado(`/tecnicos/${tecnicoId}/fotos/`).then(extraerLista)
 
-export function subirFotoDeTrabajo(trabajoId, archivo, descripcion = "") {
-  const formulario = new FormData();
-  formulario.append("imagen", archivo);
-  formulario.append("descripcion", descripcion);
-  return pedir(`/trabajos/${trabajoId}/fotos/`, {
-    metodo: "POST",
-    cuerpo: formulario,
-    esArchivo: true,
-  });
+// http.js solo manda JSON, así que la foto (multipart) se envía acá.
+// No toca los tokens de sesión: solo lee el access para el encabezado.
+export async function subirFotoDeTrabajo(trabajoId, archivo, descripcion = '') {
+  const token = obtenerAccessToken()
+  if (!token) throw new Error('Tu sesión expiró. Volvé a iniciar sesión.')
+
+  const formulario = new FormData()
+  formulario.append('imagen', archivo)
+  formulario.append('descripcion', descripcion)
+
+  // Sin Content-Type: el navegador arma el multipart solo.
+  const respuesta = await fetch(`${API_BASE_URL}/trabajos/${trabajoId}/fotos/`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formulario,
+  })
+  const datos = await respuesta.json().catch(() => null)
+  if (!respuesta.ok) {
+    const error = new Error(mensajeDeError(datos))
+    error.status = respuesta.status
+    throw error
+  }
+  return datos
 }
-
-// SUPUESTO: endpoint de detalle de trabajo de Int. 3. Cuando exista su servicio
-// (por ejemplo trabajosService.js), usá ese y borrá esta función.
-export const obtenerTrabajo = (trabajoId) => pedir(`/trabajos/${trabajoId}/`);

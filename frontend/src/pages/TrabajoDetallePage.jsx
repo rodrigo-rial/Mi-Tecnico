@@ -19,7 +19,7 @@ import {
 } from '../utils/navegacion'
 import { accionesDisponibles, armarPasos } from '../utils/trabajos'
 import CodigoSeguridadTecnico from '../components/token/CodigoSeguridadTecnico'
-
+import PanelReputacionTrabajo from '../components/reputacion/PanelReputacionTrabajo'
 
 const CLASE_BOTON_ENLACE = 'mt-button inline-flex items-center justify-center'
 
@@ -220,6 +220,12 @@ function TrabajoDetallePage() {
             </h2>
             <LineaTiempo pasos={armarPasos(trabajo)} />
           </section>
+
+          {usuario && (
+            <section className="mt-card">
+              <PanelReputacionTrabajo trabajo={trabajo} usuarioId={usuario.id} />
+            </section>
+          )}
 
           {acciones.length > 0 && (
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
