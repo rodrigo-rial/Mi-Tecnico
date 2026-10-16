@@ -20,8 +20,13 @@ Reconstruir backend y urgencias_worker para instalar Pillow; ejecutar `python ma
 
 ## Pendientes posteriores
 - Verificación visual con cuentas de cliente y técnico de un trabajo finalizado.
-- Mostrar reputación en perfiles y completar la experiencia de fotos/calificaciones.
+- Comprobar visualmente el promedio de reputación en las cuentas y el perfil profesional.
 - Edición de datos básicos de cuenta y fotografías opcionales de solicitudes.
 - Pruebas de aceptación del recorrido completo y preparación de entrega.
 
 Esta rama todavía no se publica ni se integra a develop.
+
+## Reputación en perfiles
+Se conectó el resumen a Mi cuenta (cliente/técnico) y al perfil profesional. Incluye promedio, cantidad, estado sin calificaciones, errores y reintento. Descarta respuestas de pantallas abandonadas.
+
+La subida de fotos usa el cliente HTTP compartido, que admite FormData sin fijar Content-Type y renueva el acceso ante un 401. Pruebas: `docker compose exec frontend node --test tests/http.test.mjs` (JSON, reenvío del archivo tras renovar y sesión no renovable).

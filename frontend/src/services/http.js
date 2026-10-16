@@ -36,14 +36,15 @@ function sesionExpirada() {
 async function enviar(ruta, { method, datos, token }) {
   const headers = { Authorization: `Bearer ${token}` }
 
-  if (datos !== undefined) {
+  const esFormulario = datos instanceof FormData
+  if (datos !== undefined && !esFormulario) {
     headers['Content-Type'] = 'application/json'
   }
 
   const respuesta = await fetch(`${API_BASE_URL}${ruta}`, {
     method,
     headers,
-    body: datos === undefined ? undefined : JSON.stringify(datos),
+    body: datos === undefined ? undefined : esFormulario ? datos : JSON.stringify(datos),
   })
 
   const tipoContenido = respuesta.headers.get('content-type') ?? ''

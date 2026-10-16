@@ -1,3 +1,4 @@
+import ResumenReputacion from '../components/reputacion/ResumenReputacion'
 import { Link } from 'react-router-dom'
 import LayoutPagina from '../components/comunes/LayoutPagina'
 import { useUsuarioActual } from '../hooks/useUsuarioActual'
@@ -19,7 +20,7 @@ export default function CuentaPage() {
             <div><dt>Correo electrónico</dt><dd>{usuario.email || 'No informado'}</dd></div>
             <div><dt>Tipo de cuenta</dt><dd>{rol}</dd></div>
           </dl></section>
-          <aside className="space-y-4"><section className="mt-card"><h2 className="font-bold text-lg">{tecnico ? 'Tu espacio profesional' : 'Todo a mano'}</h2><p className="text-sm text-slate-500 mt-2">{tecnico ? 'Gestioná tu presentación, servicios y zonas de cobertura.' : 'Consultá tus pedidos y seguí los servicios que ya coordinaste.'}</p>{usuario.rol !== 'ADMINISTRADOR' && <Link className="quick-link" to={tecnico ? '/tecnico' : '/cliente/solicitudes'}>{tecnico ? 'Ver mi perfil profesional' : 'Ver mis solicitudes'} <span aria-hidden="true">→</span></Link>}{usuario.rol !== 'ADMINISTRADOR' && <Link className="quick-link" to="/trabajos">{tecnico ? 'Mis trabajos' : 'Servicios contratados'} <span aria-hidden="true">→</span></Link>}</section></aside>
+          <aside className="space-y-4">{usuario.rol !== 'ADMINISTRADOR' && <section className="mt-card space-y-3"><h2 className="text-lg font-bold">Mi reputación</h2><ResumenReputacion usuarioId={usuario.id} /></section>}<section className="mt-card"><h2 className="font-bold text-lg">{tecnico ? 'Tu espacio profesional' : 'Todo a mano'}</h2><p className="text-sm text-slate-500 mt-2">{tecnico ? 'Gestioná tu presentación, servicios y zonas de cobertura.' : 'Consultá tus pedidos y seguí los servicios que ya coordinaste.'}</p>{usuario.rol !== 'ADMINISTRADOR' && <Link className="quick-link" to={tecnico ? '/tecnico' : '/cliente/solicitudes'}>{tecnico ? 'Ver mi perfil profesional' : 'Ver mis solicitudes'} <span aria-hidden="true">→</span></Link>}{usuario.rol !== 'ADMINISTRADOR' && <Link className="quick-link" to="/trabajos">{tecnico ? 'Mis trabajos' : 'Servicios contratados'} <span aria-hidden="true">→</span></Link>}</section></aside>
         </div>
       </>}
     </LayoutPagina>

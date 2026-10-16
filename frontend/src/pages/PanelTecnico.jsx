@@ -1,3 +1,4 @@
+import ResumenReputacion from '../components/reputacion/ResumenReputacion'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import LayoutPagina from '../components/comunes/LayoutPagina'
@@ -164,6 +165,7 @@ export default function PanelTecnico({ token }) {
             {perfil && documentacion && (aprobado ? <details className="mt-card"><summary className="cursor-pointer font-semibold min-h-11">Documentación verificada <span className="text-sm font-normal text-slate-500">· Ver opciones</span></summary><p className="mb-4 text-sm text-slate-600">Tu documentación ya está aprobada. Si necesitás actualizarla, el perfil volverá a revisión.</p><DocumentacionTecnicoForm documentacion={documentacion} onGuardar={guardarDocumentacion} /></details> : <DocumentacionTecnicoForm documentacion={documentacion} onGuardar={guardarDocumentacion} />)}
           </div>
           <aside className="space-y-5">
+            {usuario && <section className="mt-card space-y-3"><h2 className="text-lg font-bold">Mi reputación</h2><ResumenReputacion usuarioId={usuario.id} /></section>}
             <section className="mt-card"><span className="eyebrow">{aprobado ? 'LISTO PARA TRABAJAR' : 'TU VERIFICACIÓN'}</span><h2 className="font-bold text-xl mt-3">{aprobado ? 'Solicitudes disponibles' : estado === 'RECHAZADO' ? 'Revisá tu documentación' : 'Completar verificación'}</h2><p className="text-sm text-slate-500 mt-3">{aprobado ? 'Explorá solicitudes que coinciden con tus servicios y tu zona.' : 'Completá tu perfil y adjuntá DNI y matrícula. El equipo revisará tu documentación antes de habilitar las propuestas.'}</p>{aprobado && <Link to="/tecnico/solicitudes" className="mt-button mt-5 inline-flex">Ver solicitudes <span className="ml-3" aria-hidden="true">→</span></Link>}</section>
             <section className="mt-card"><h2 className="font-bold">Mi actividad</h2><Link className="quick-link" to="/tecnico/propuestas">Mis propuestas <span aria-hidden="true">→</span></Link><Link className="quick-link" to="/trabajos">Mis trabajos <span aria-hidden="true">→</span></Link><Link className="quick-link" to="/cuenta">Datos de mi cuenta <span aria-hidden="true">→</span></Link></section>
           </aside>
