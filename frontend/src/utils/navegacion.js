@@ -1,4 +1,5 @@
 export const ENLACES_CLIENTE = [
+  { to: '/cliente/tecnicos', texto: 'Buscar técnicos' },
   { to: '/cliente/solicitudes', texto: 'Solicitudes', end: true },
   { to: '/trabajos', texto: 'Servicios contratados' },
 ]

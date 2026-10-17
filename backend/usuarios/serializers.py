@@ -43,11 +43,17 @@ class RegistroUsuarioSerializer(serializers.ModelSerializer):
         return usuario
 
 class UsuarioActualSerializer(serializers.ModelSerializer):
+    foto_perfil = serializers.SerializerMethodField()
+
+    def get_foto_perfil(self, obj):
+        from .fotos import ruta_foto
+        return ruta_foto(obj)
+
     class Meta:
         model = Usuario
         fields = (
             "id", "username", "email", "first_name", "last_name", "rol",
-            "telefono", "domicilio_referencia",
+            "telefono", "domicilio_referencia", "foto_perfil",
         )
         read_only_fields = ("id", "username", "rol")
         extra_kwargs = {"email": {"required": True, "allow_blank": False}}

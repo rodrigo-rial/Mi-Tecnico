@@ -1,3 +1,5 @@
+import Avatar from '../components/comunes/Avatar'
+import FotoPerfil from '../components/cuenta/FotoPerfil'
 import { useState } from 'react'
 import EditarCuenta from '../components/cuenta/EditarCuenta'
 import ResumenReputacion from '../components/reputacion/ResumenReputacion'
@@ -16,7 +18,8 @@ export default function CuentaPage() {
   return (
     <LayoutPagina titulo="Mi cuenta" descripcion="Tu información personal, en un solo lugar." enlaces={enlacesPorRol(usuario?.rol)}>
       {cargando ? <p role="status">Cargando tu cuenta…</p> : !usuario ? <div role="alert" className="mt-card">No pudimos cargar tu cuenta. <Link className="text-brand underline" to="/login">Volver a iniciar sesión</Link></div> : <>
-        <section className="profile-cover"><div className="profile-cover-art" aria-hidden="true"/><div className="profile-identity"><div className="profile-avatar" aria-hidden="true">{nombre.slice(0, 1).toUpperCase()}</div><div className="min-w-0"><p className="eyebrow">TU PERFIL</p><h2 className="break-words">{nombre}</h2><p className="text-slate-500 break-all">@{usuario.username}</p></div><span className="role-pill">{rol}</span></div></section>
+        <section className="profile-cover"><div className="profile-cover-art" aria-hidden="true"/><div className="profile-identity"><Avatar ruta={usuario.foto_perfil} nombre={nombre} className="profile-avatar" /><div className="min-w-0"><p className="eyebrow">TU PERFIL</p><h2 className="break-words">{nombre}</h2><p className="text-slate-500 break-all">@{usuario.username}</p></div><span className="role-pill">{rol}</span></div></section>
+        <FotoPerfil usuario={usuario} onCambio={actualizarUsuario} />
         <div className="profile-columns">
           <section className="mt-card"><p className="eyebrow">INFORMACIÓN PERSONAL</p><h2 className="text-xl font-bold mt-2">Los datos de tu cuenta</h2>{aviso && <p role="status" className="text-emerald-700 mt-3">{aviso}</p>}
           {editando ? <EditarCuenta usuario={usuario} onCancelar={() => setEditando(false)} onGuardado={(cuenta) => { actualizarUsuario(cuenta); setEditando(false); setAviso('Datos guardados correctamente.') }} /> : <><button className="secondary-button mt-4" type="button" onClick={() => { setAviso(''); setEditando(true) }}>Editar datos</button><dl className="account-fields">

@@ -38,6 +38,7 @@ function SolicitudCard({
         </div>
       </div>
 
+      {solicitud.destinatario_nombre && <p className="mt-2 text-sm font-semibold text-brand">Dirigida a {solicitud.destinatario_nombre}</p>}
       <p className="mt-1 text-sm text-slate-600">
         {solicitud.especialidad_nombre} · {solicitud.zona_nombre}
       </p>

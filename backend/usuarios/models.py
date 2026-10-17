@@ -8,6 +8,7 @@ class Usuario(AbstractUser):
         TECNICO = "TECNICO", "Tecnico"
         ADMINISTRADOR = "ADMINISTRADOR", "Administrador"
 
+    foto_perfil = models.ImageField(upload_to="avatares/", blank=True, default="")
     telefono = models.CharField(max_length=30, blank=True, default="")
     domicilio_referencia = models.CharField(max_length=255, blank=True, default="")
     email = models.EmailField(unique=True)
