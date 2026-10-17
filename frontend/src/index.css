@@ -166,3 +166,14 @@
 .availability-switch:focus-visible { outline: 3px solid #1a73e8; outline-offset: 4px; }
 .availability-switch:disabled { opacity: .5; cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) { .availability-switch, .availability-thumb { transition: none; } }
+
+/* Los textos ingresados por usuarios deben ajustarse al ancho disponible. */
+.mt-card, .profile-columns > *, .profile-identity > * { min-width: 0; }
+.request-card, .profile-identity, .service-chip, .coverage-chip { overflow-wrap: anywhere; }
+.account-menu { flex-shrink: 0; }
+.account-menu-panel { max-width: calc(100vw - 32px); }
+@media (max-width: 480px) {
+  .activity-summary { grid-template-columns: minmax(0, 1fr); }
+  .activity-summary button { display: flex; }
+  .activity-summary span { margin-top: 0; font-size: 12px; }
+}
