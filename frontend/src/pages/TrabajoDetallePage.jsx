@@ -118,7 +118,7 @@ function TrabajoDetallePage() {
     >
       <p>
         <Link to={RUTA_TRABAJOS} className="text-sm font-semibold text-brand hover:underline">
-          ← Volver a mis trabajos
+          ← {rol === 'CLIENTE' ? 'Volver a servicios contratados' : 'Volver a mis trabajos'}
         </Link>
       </p>
 
