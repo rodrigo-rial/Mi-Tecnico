@@ -14,7 +14,8 @@ class RegistroUsuarioView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
 
-class UsuarioActualView(generics.RetrieveAPIView):
+class UsuarioActualView(generics.RetrieveUpdateAPIView):
+    http_method_names = ["get", "patch", "head", "options"]
     serializer_class = UsuarioActualSerializer
     permission_classes = [IsAuthenticated]
 

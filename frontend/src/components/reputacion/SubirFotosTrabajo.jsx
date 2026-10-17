@@ -35,6 +35,8 @@ export default function SubirFotosTrabajo({ trabajoId, cantidadActual, maximo = 
   async function enviar(evento) {
     evento.preventDefault();
     if (!archivo) return setError("Elegí una foto primero.");
+    const formulario = evento.currentTarget;
+    setExito("");
     setEnviando(true);
     setError("");
     try {
@@ -42,7 +44,7 @@ export default function SubirFotosTrabajo({ trabajoId, cantidadActual, maximo = 
       setExito("Foto subida correctamente.");
       setArchivo(null);
       setDescripcion("");
-      evento.target.reset();
+      formulario.reset();
       onSubida();
     } catch (e) {
       setError(e.message);
@@ -63,9 +65,14 @@ export default function SubirFotosTrabajo({ trabajoId, cantidadActual, maximo = 
           accept={TIPOS.join(",")}
           onChange={elegirArchivo}
           disabled={enviando}
-          className="mt-1 block w-full text-sm"
+          aria-describedby="ayuda-foto"
+          className="mt-2 block w-full rounded-lg border border-slate-300 bg-white p-2 text-sm text-slate-600 file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-3 file:font-semibold file:text-blue-700 hover:file:bg-blue-100 focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-60"
         />
       </div>
+      <p id="ayuda-foto" className="text-sm text-slate-500">
+        {archivo ? `Lista para subir: ${archivo.name}` : 'Primero tocá “Seleccionar archivo” y elegí una foto.'}
+        {' '}JPG, PNG o WEBP, hasta 5 MB.
+      </p>
       <div>
         <label htmlFor="descripcion-foto" className="block text-sm font-medium text-[#364152]">
           Descripción (opcional)
