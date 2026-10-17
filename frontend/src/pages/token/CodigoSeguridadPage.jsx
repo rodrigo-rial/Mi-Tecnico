@@ -13,16 +13,21 @@ export default function CodigoSeguridadPage() {
 
   const cargar = useCallback(async () => {
     try {
+      const respuesta = await obtenerToken(trabajoId);
+      setDatos(respuesta);
       setError("");
-      setDatos(await obtenerToken(trabajoId));
     } catch (e) {
       setError(mensajeError(e));
     }
   }, [trabajoId]);
 
   useEffect(() => {
-    cargar();
-  }, [cargar]);
+    let activo = true;
+    obtenerToken(trabajoId).then((respuesta) => {
+      if (activo) { setDatos(respuesta); setError(""); }
+    }).catch((e) => { if (activo) setError(mensajeError(e)); });
+    return () => { activo = false; };
+  }, [trabajoId]);
 
   function alValidar(respuesta) {
     setExito(true);

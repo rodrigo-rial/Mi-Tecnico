@@ -1,4 +1,9 @@
+import ResumenReputacion from '../components/reputacion/ResumenReputacion'
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import LayoutPagina from '../components/comunes/LayoutPagina'
+import { ENLACES_TECNICO } from '../utils/navegacion'
+import { useUsuarioActual } from '../hooks/useUsuarioActual'
 
 import DocumentacionTecnicoForm from '../components/tecnicos/DocumentacionTecnicoForm'
 import PerfilTecnicoForm from '../components/tecnicos/PerfilTecnicoForm'
@@ -49,6 +54,8 @@ async function solicitarDatosPanel(token) {
 }
 
 export default function PanelTecnico({ token }) {
+  const { usuario } = useUsuarioActual()
+  const [editando, setEditando] = useState(false)
   const [perfil, setPerfil] = useState(null)
   const [documentacion, setDocumentacion] = useState(null)
   const [especialidades, setEspecialidades] = useState([])
@@ -137,80 +144,33 @@ export default function PanelTecnico({ token }) {
 
   const estado = perfil?.estado_validacion
 
+  const aprobado = estado === 'APROBADO'
+  const nombre = [usuario?.first_name, usuario?.last_name].filter(Boolean).join(' ') || usuario?.username || 'Mi perfil profesional'
+  const servicios = especialidades.filter(({ id }) => perfil?.especialidades?.includes(id))
+  const cobertura = zonas.filter(({ id }) => perfil?.zonas?.includes(id))
+
   return (
-    <main className="min-h-screen bg-canvas px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl space-y-8">
-        <header className="rounded-2xl bg-gradient-to-br from-brand to-brand-dark p-6 text-white shadow-sm sm:p-8">
-          <p className="text-sm font-semibold uppercase tracking-wider text-blue-100">
-            MiTécnico
-          </p>
-          <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold sm:text-4xl">Panel del técnico</h1>
-              <p className="mt-2 max-w-2xl text-blue-100">
-                Completá tu información profesional y enviá la documentación para revisión.
-              </p>
-            </div>
-            {estado && (
-              <span className={`w-fit rounded-full px-4 py-2 text-sm font-semibold ${estilosEstado[estado]}`}>
-                {etiquetasEstado[estado]}
-              </span>
-            )}
+    <LayoutPagina titulo="Mi perfil profesional" descripcion="Tu oficio, tu experiencia y los lugares donde trabajás." enlaces={ENLACES_TECNICO}>
+      {cargando && <p role="status" className="mt-card">Cargando tu perfil…</p>}
+      {!cargando && error && <section role="alert" className="mt-card"><h2 className="font-bold">No pudimos cargar tu perfil</h2><p>{error}</p><button onClick={reintentarCarga} className="mt-button mt-4">Volver a intentar</button></section>}
+      {!cargando && !error && <>
+        <section className="profile-cover">
+          <div className="profile-cover-art professional-cover" aria-hidden="true"></div>
+          <div className="profile-identity"><div className="profile-avatar" aria-hidden="true">{nombre.slice(0, 1).toUpperCase()}</div><div className="min-w-0"><h2 className="break-words">{nombre}</h2><p className="text-slate-500 mt-1">{servicios.map(({ nombre: servicio }) => servicio).join(' · ') || 'Profesional de MiTécnico'}</p></div>{estado && <span className={`role-pill ${estilosEstado[estado]}`}>{aprobado ? '✓ Técnico verificado' : etiquetasEstado[estado]}</span>}</div>
+        </section>
+        <div className="profile-columns">
+          <div className="space-y-5 min-w-0">
+            {perfil && <section className="mt-card"><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-bold">Acerca de mí</h2><button type="button" className="secondary-button" aria-expanded={editando} onClick={() => setEditando(!editando)}>{editando ? 'Cerrar edición' : 'Editar perfil'}</button></div><p className="mt-4 whitespace-pre-line break-words text-slate-600">{perfil.descripcion || 'Agregá una descripción para contar tu experiencia y los servicios que ofrecés.'}</p><h3 className="font-semibold mt-6 mb-3">Mis especialidades</h3><div className="flex flex-wrap gap-2">{servicios.map(({ id, nombre: servicio }) => <span className="service-chip" key={id}>{servicio}</span>)}</div><h3 className="font-semibold mt-6 mb-3">Dónde trabajo</h3><div className="flex flex-wrap gap-2">{cobertura.map(({ id, nombre: zona }) => <span className="coverage-chip" key={id}>{zona}</span>)}</div></section>}
+            {(!perfil || editando || !aprobado) && <PerfilTecnicoForm key={perfil?.id ?? 'perfil-nuevo'} perfil={perfil ?? {}} especialidades={especialidades} zonas={zonas} onGuardar={guardarPerfil} />}
+            {perfil && documentacion && (aprobado ? <details className="mt-card"><summary className="cursor-pointer font-semibold min-h-11">Documentación verificada <span className="text-sm font-normal text-slate-500">· Ver opciones</span></summary><p className="mb-4 text-sm text-slate-600">Tu documentación ya está aprobada. Si necesitás actualizarla, el perfil volverá a revisión.</p><DocumentacionTecnicoForm documentacion={documentacion} onGuardar={guardarDocumentacion} /></details> : <DocumentacionTecnicoForm documentacion={documentacion} onGuardar={guardarDocumentacion} />)}
           </div>
-        </header>
-
-        {cargando && (
-          <section role="status" className="mt-card text-center text-ink">
-            Cargando tu información…
-          </section>
-        )}
-
-        {!cargando && error && (
-          <section role="alert" className="rounded-xl border border-danger bg-red-50 p-6">
-            <h2 className="font-bold text-red-800">No pudimos cargar el panel</h2>
-            <p className="mt-2 text-red-700">{error}</p>
-            <button type="button" onClick={reintentarCarga}
-              className="mt-button mt-4">
-              Volver a intentar
-            </button>
-          </section>
-        )}
-
-        {!cargando && !error && (
-          <div className="grid gap-8 lg:grid-cols-[1fr_18rem]">
-            <div className="space-y-8">
-              <PerfilTecnicoForm
-                key={perfil?.id ?? 'perfil-nuevo'}
-                perfil={perfil ?? {}}
-                especialidades={especialidades}
-                zonas={zonas}
-                onGuardar={guardarPerfil}
-              />
-              {perfil && documentacion && (
-                <DocumentacionTecnicoForm
-                  key={`${perfil.id}-${documentacion.actualizado_en ?? 'documentacion'}`}
-                  documentacion={documentacion}
-                  onGuardar={guardarDocumentacion}
-                />
-              )}
-            </div>
-
-            <aside className="mt-card h-fit">
-              <h2 className="text-lg font-bold text-ink">Pasos para validar tu perfil</h2>
-              <ol className="mt-4 space-y-4 text-sm text-ink">
-                <li><strong className="text-brand">1.</strong> Completá tu perfil profesional.</li>
-                <li><strong className="text-brand">2.</strong> Cargá DNI y matrícula.</li>
-                <li><strong className="text-brand">3.</strong> Esperá la revisión del administrador.</li>
-              </ol>
-              {!perfil && (
-                <p className="mt-5 rounded-lg bg-blue-50 p-4 text-sm text-blue-800">
-                  Primero guardá el perfil para habilitar la documentación.
-                </p>
-              )}
-            </aside>
-          </div>
-        )}
-      </div>
-    </main>
+          <aside className="space-y-5">
+            {usuario && <section className="mt-card space-y-3"><h2 className="text-lg font-bold">Mi reputación</h2><ResumenReputacion usuarioId={usuario.id} /></section>}
+            <section className="mt-card"><span className="eyebrow">{aprobado ? 'LISTO PARA TRABAJAR' : 'TU VERIFICACIÓN'}</span><h2 className="font-bold text-xl mt-3">{aprobado ? 'Solicitudes disponibles' : estado === 'RECHAZADO' ? 'Revisá tu documentación' : 'Completar verificación'}</h2><p className="text-sm text-slate-500 mt-3">{aprobado ? 'Explorá solicitudes que coinciden con tus servicios y tu zona.' : 'Completá tu perfil y adjuntá DNI y matrícula. El equipo revisará tu documentación antes de habilitar las propuestas.'}</p>{aprobado && <Link to="/tecnico/solicitudes" className="mt-button mt-5 inline-flex">Ver solicitudes <span className="ml-3" aria-hidden="true">→</span></Link>}</section>
+            <section className="mt-card"><h2 className="font-bold">Mi actividad</h2><Link className="quick-link" to="/tecnico/propuestas">Mis propuestas <span aria-hidden="true">→</span></Link><Link className="quick-link" to="/trabajos">Mis trabajos <span aria-hidden="true">→</span></Link><Link className="quick-link" to="/cuenta">Datos de mi cuenta <span aria-hidden="true">→</span></Link></section>
+          </aside>
+        </div>
+      </>}
+    </LayoutPagina>
   )
 }

@@ -1,3 +1,4 @@
+import FotosSolicitud from './FotosSolicitud'
 import { Link } from 'react-router-dom'
 
 import Badge from '../comunes/Badge'
@@ -17,9 +18,9 @@ function SolicitudCard({
   children,
 }) {
   return (
-    <article className="mt-card">
-      <div className="flex items-start justify-between gap-3">
-        <h2 className="text-lg font-semibold text-ink">
+    <article className="mt-card request-card">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <h2 className="text-lg font-semibold text-ink break-words min-w-0">
           {conEnlace ? (
             <Link
               to={rutaDetalleSolicitud(solicitud.id)}
@@ -45,7 +46,7 @@ function SolicitudCard({
         {solicitud.descripcion}
       </p>
 
-      <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
+      <dl className="mt-4 grid gap-3 rounded-xl bg-canvas p-3 text-sm sm:grid-cols-3 break-words">
         <div>
           <dt className="text-slate-500">Dirección</dt>
           <dd className="font-medium text-ink">{solicitud.direccion}</dd>
@@ -75,6 +76,7 @@ function SolicitudCard({
         </p>
       )}
 
+      <FotosSolicitud key={solicitud.id} solicitud={solicitud} />
       {children && <div className="mt-4">{children}</div>}
     </article>
   )

@@ -1,15 +1,5 @@
 import { nombreVisible } from './formato'
 
-const INICIAR = {
-  estado: 'en_proceso',
-  texto: 'Iniciar trabajo',
-  titulo: 'Iniciar trabajo',
-  mensaje: 'Vas a marcar el trabajo como en proceso. Hacelo cuando comiences la visita.',
-  textoConfirmar: 'Iniciar',
-  peligro: false,
-  exito: 'El trabajo está en proceso.',
-}
-
 const FINALIZAR = {
   estado: 'finalizado',
   texto: 'Finalizar trabajo',
@@ -33,14 +23,13 @@ const CANCELAR = {
 
 /**
  * Acciones que ofrece la pantalla según el estado y el rol. Reflejan las
- * reglas del backend (que igualmente las valida): el técnico inicia y
+ * reglas del backend: la validación del código inicia la visita; el técnico
  * finaliza; cliente y técnico pueden cancelar antes de la finalización.
  */
 export function accionesDisponibles(estado, rol) {
   const esParticipante = rol === 'TECNICO' || rol === 'CLIENTE'
   const acciones = []
 
-  if (rol === 'TECNICO' && estado === 'pendiente') acciones.push(INICIAR)
   if (rol === 'TECNICO' && estado === 'en_proceso') acciones.push(FINALIZAR)
   if (esParticipante && (estado === 'pendiente' || estado === 'en_proceso')) {
     acciones.push(CANCELAR)

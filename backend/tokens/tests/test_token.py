@@ -5,7 +5,32 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APITestCase
 
-from reputacion.tests.helpers import crear_trabajo, crear_usuario  # T5
+from datetime import date
+from decimal import Decimal
+from solicitudes.tests import crear_usuario
+from solicitudes.models import Solicitud, Propuesta
+from tecnicos.models import Especialidad, Zona
+
+
+def crear_trabajo(*, estado, tecnico=None, email_cliente="cliente@test.com"):
+    cliente = crear_usuario(email_cliente, "CLIENTE")
+    tecnico = tecnico or crear_usuario("tecnico@test.com", "TECNICO")
+    especialidad, _ = Especialidad.objects.get_or_create(nombre="Electricidad")
+    zona, _ = Zona.objects.get_or_create(nombre="Tolosa")
+    solicitud = Solicitud.objects.create(
+        cliente=cliente, titulo="Prueba de visita", descripcion="Revisar instalación",
+        especialidad=especialidad, zona=zona, direccion="Calle de prueba 123",
+        estado=Solicitud.Estado.ASIGNADA,
+    )
+    propuesta = Propuesta.objects.create(
+        solicitud=solicitud, tecnico=tecnico, precio=Decimal("1500"),
+        descripcion_solucion="Revisión", fecha_disponible=date.today(),
+        estado=Propuesta.Estado.ACEPTADA,
+    )
+    return Trabajo.objects.create(
+        solicitud=solicitud, propuesta=propuesta, cliente=cliente,
+        tecnico=tecnico, precio_acordado=propuesta.precio, estado=estado,
+    )
 from solicitudes.models import Trabajo
 from tokens.models import MAX_INTENTOS_FALLIDOS, TokenTrabajo
 

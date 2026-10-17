@@ -25,5 +25,5 @@ export function useUsuarioActual() {
     }
   }, [])
 
-  return estado
+  return { ...estado, actualizarUsuario: (usuario) => setEstado({ usuario, cargando: false }) }
 }

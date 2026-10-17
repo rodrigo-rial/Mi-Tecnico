@@ -33,21 +33,22 @@ function sesionExpirada() {
   return error
 }
 
-async function enviar(ruta, { method, datos, token }) {
+async function enviar(ruta, { method, datos, token, archivo }) {
   const headers = { Authorization: `Bearer ${token}` }
 
-  if (datos !== undefined) {
+  const esFormulario = datos instanceof FormData
+  if (datos !== undefined && !esFormulario) {
     headers['Content-Type'] = 'application/json'
   }
 
   const respuesta = await fetch(`${API_BASE_URL}${ruta}`, {
     method,
     headers,
-    body: datos === undefined ? undefined : JSON.stringify(datos),
+    body: datos === undefined ? undefined : esFormulario ? datos : JSON.stringify(datos),
   })
 
   const tipoContenido = respuesta.headers.get('content-type') ?? ''
-  const contenido = tipoContenido.includes('application/json')
+  const contenido = archivo && respuesta.ok ? await respuesta.blob() : tipoContenido.includes('application/json')
     ? await respuesta.json()
     : null
 
@@ -78,11 +79,11 @@ function renovarAccessToken() {
  * Llamada a la API con el token guardado. Si el access token venció (401),
  * lo renueva con el refresh token y reintenta una vez.
  */
-export async function solicitarAutenticado(ruta, { method = 'GET', datos } = {}) {
+export async function solicitarAutenticado(ruta, { method = 'GET', datos, archivo = false } = {}) {
   let token = obtenerAccessToken()
   if (!token) throw sesionExpirada()
 
-  let resultado = await enviar(ruta, { method, datos, token })
+  let resultado = await enviar(ruta, { method, datos, token, archivo })
 
   if (resultado.respuesta.status === 401) {
     try {
@@ -91,7 +92,7 @@ export async function solicitarAutenticado(ruta, { method = 'GET', datos } = {})
       cerrarSesion()
       throw sesionExpirada()
     }
-    resultado = await enviar(ruta, { method, datos, token })
+    resultado = await enviar(ruta, { method, datos, token, archivo })
   }
 
   if (!resultado.respuesta.ok) {

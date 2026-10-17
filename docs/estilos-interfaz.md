@@ -23,3 +23,19 @@ Si se decide alojarla localmente, cambiar solo esa definición compartida.
 
 La vista temporal de App.jsx contiene ejemplos y no guarda datos. No es la integración del login.
 Aplicar estas mismas reglas al montar PanelTecnico y al integrar las pantallas del equipo.
+
+
+## Organización de pantallas (interfaz-perfiles)
+
+- Navegación compartida: lateral en escritorio y enlaces adaptables en móvil.
+- Cliente: acceso destacado a pedir servicio, resumen calculado desde sus solicitudes,
+  búsqueda local por título/especialidad/zona y filtros por estado.
+- Cuenta: portada, inicial del nombre como avatar (sin subir fotos), datos reales
+  y accesos por rol; técnicos también pueden acceder a `/cuenta`.
+- Técnico aprobado: presentación profesional, servicios y cobertura. Edición del
+  perfil bajo una acción explícita y documentación dentro de un desplegable cerrado.
+- Pendientes/rechazados mantienen visibles los formularios para completar o corregir.
+- Reemplazar documentación conserva la regla de volver a PENDIENTE. No se cambian
+  modelos, endpoints ni permisos del backend.
+- Las cifras son datos reales. No se muestran valoraciones, ingresos ni notificaciones
+  ficticias. La cuenta personal sigue siendo de consulta, sin edición de datos de usuario.

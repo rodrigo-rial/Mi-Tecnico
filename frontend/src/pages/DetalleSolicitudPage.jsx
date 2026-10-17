@@ -281,15 +281,12 @@ function DetalleSolicitudPage() {
                 El pago se acuerda directamente con el técnico, fuera de MiTécnico.
               </p>
 
-              {/* ========================================== */}
-              {/* PASO 2: Le pasamos onValidado={alValidarCodigo} */}
-              {/* ========================================== */}
-              <div className="mt-4 border-t border-slate-200 pt-4">
+              {datos.trabajo.estado === 'pendiente' && <div className="mt-4 border-t border-slate-200 pt-4">
                 <FormularioValidarCodigo 
                   trabajoId={datos.trabajo.id} 
-                  onValidado={alValidarCodigo} 
+                  onValidado={alValidarCodigo}
                 />
-              </div>
+              </div>}
 
               <Link to={rutaTrabajo(datos.trabajo.id)} className={CLASE_BOTON_ENLACE}>
                 Ver seguimiento del trabajo

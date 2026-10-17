@@ -2,7 +2,8 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils import timezone
 from rest_framework import serializers
 
-from .models import Solicitud
+from .models import Solicitud, FotoSolicitud
+from django.db import transaction
 from solicitudes.models import Propuesta
 
 
@@ -14,6 +15,34 @@ def a_error_drf(exc):
 
 
 class SolicitudSerializer(serializers.ModelSerializer):
+    fotos = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    imagenes = serializers.ListField(child=serializers.ImageField(), max_length=5, required=False, write_only=True)
+
+    def validate_imagenes(self, archivos):
+        for archivo in archivos:
+            if archivo.size > 5 * 1024 * 1024:
+                raise serializers.ValidationError("Cada foto puede pesar hasta 5 MB.")
+            if archivo.image.format not in {"JPEG", "PNG", "WEBP"}:
+                raise serializers.ValidationError("Usá fotos JPG, PNG o WEBP.")
+        return archivos
+
+    def create(self, validated_data):
+        archivos = validated_data.pop("imagenes", [])
+        guardadas = []
+        try:
+            with transaction.atomic():
+                solicitud = Solicitud.objects.create(**validated_data)
+                for archivo in archivos:
+                    foto = FotoSolicitud(solicitud=solicitud)
+                    foto.imagen.save(archivo.name, archivo, save=False)
+                    guardadas.append(foto.imagen)
+                    foto.save()
+                return solicitud
+        except Exception:
+            for imagen in guardadas:
+                imagen.delete(save=False)
+            raise
+
     especialidad_nombre = serializers.CharField(
         source="especialidad.nombre", read_only=True
     )
@@ -35,6 +64,8 @@ class SolicitudSerializer(serializers.ModelSerializer):
             "es_urgente",
             "estado",
             "created_at",
+            "fotos",
+            "imagenes",
         ]
         read_only_fields = ["id", "cliente", "estado", "created_at"]
 
@@ -58,7 +89,7 @@ class SolicitudSerializer(serializers.ModelSerializer):
         user = getattr(request, "user", None) if request else None
 
         if self.instance is None:
-            solicitud = Solicitud(cliente=user, **attrs)
+            solicitud = Solicitud(cliente=user, **{k: v for k, v in attrs.items() if k != "imagenes"})
         else:
             solicitud = self.instance
             for attr, val in attrs.items():

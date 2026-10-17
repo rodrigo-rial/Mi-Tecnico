@@ -1,9 +1,11 @@
+import PerfilProfesionalPage from './pages/PerfilProfesionalPage'
 import {
   Navigate,
   Route,
   Routes,
 } from 'react-router-dom'
 
+import UrgenciasPage from './pages/UrgenciasPage'
 import LoginPage from './pages/LoginPage'
 import RegistroPage from './pages/RegistroPage'
 import CuentaPage from './pages/CuentaPage'
@@ -38,7 +40,7 @@ function App() {
       <Route
         element={(
           <RutaProtegida
-            rolesPermitidos={['CLIENTE', 'ADMINISTRADOR']}
+            rolesPermitidos={['CLIENTE', 'TECNICO', 'ADMINISTRADOR']}
           />
         )}
       >
@@ -54,8 +56,16 @@ function App() {
         )}
       >
         <Route
+          path="/cliente/tecnicos/:id"
+          element={<PerfilProfesionalPage />}
+        />
+        <Route
           path="/cliente/solicitudes"
           element={<SolicitudesClientePage />}
+        />
+        <Route
+          path="/cliente/urgencias"
+          element={<UrgenciasPage />}
         />
         <Route
           path="/cliente/solicitudes/nueva"

@@ -85,3 +85,32 @@ class DocumentacionTecnicoView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class PerfilProfesionalView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, usuario_id):
+        from django.db.models import Avg, Count
+        from reputacion.models import Calificacion, FotoTrabajo
+        perfil = get_object_or_404(
+            PerfilTecnico.objects.select_related("usuario"),
+            usuario_id=usuario_id, usuario__is_active=True,
+            usuario__rol="TECNICO", estado_validacion="APROBADO",
+        )
+        calificaciones = Calificacion.objects.filter(
+            destinatario_id=usuario_id, trabajo__estado="finalizado",
+        )
+        resumen = calificaciones.aggregate(promedio=Avg("puntaje"), cantidad=Count("id"))
+        fotos = FotoTrabajo.objects.filter(trabajo__tecnico_id=usuario_id, trabajo__estado="finalizado")[:50]
+        return Response({
+            "id": usuario_id,
+            "nombre": perfil.usuario.get_full_name() or perfil.usuario.username,
+            "descripcion": perfil.descripcion,
+            "especialidades": list(perfil.especialidades.values_list("nombre", flat=True)),
+            "zonas": list(perfil.zonas.values_list("nombre", flat=True)),
+            "reputacion": resumen,
+            "resenas": list(calificaciones.values("id", "puntaje", "comentario", "created_at")[:50]),
+            "fotos": [{"id": foto.pk, "imagen": request.build_absolute_uri(foto.imagen.url),
+                       "descripcion": foto.descripcion} for foto in fotos],
+        })

@@ -8,6 +8,8 @@ class Usuario(AbstractUser):
         TECNICO = "TECNICO", "Tecnico"
         ADMINISTRADOR = "ADMINISTRADOR", "Administrador"
 
+    telefono = models.CharField(max_length=30, blank=True, default="")
+    domicilio_referencia = models.CharField(max_length=255, blank=True, default="")
     email = models.EmailField(unique=True)
     rol = models.CharField(
         max_length=20,

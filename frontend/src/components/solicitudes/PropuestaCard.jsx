@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+import ResumenReputacion from '../reputacion/ResumenReputacion'
 import Badge from '../comunes/Badge'
 import {
   formatearDinero,
@@ -24,6 +26,10 @@ function PropuestaCard({ propuesta, puedeResponder, onAceptar, onRechazar }) {
         <Badge estado={propuesta.estado} />
       </div>
 
+      <div className="mt-3 space-y-2">
+        <ResumenReputacion usuarioId={propuesta.tecnico} />
+        <Link className="inline-flex min-h-11 items-center font-semibold text-brand hover:underline" to={`/cliente/tecnicos/${propuesta.tecnico}`}>Ver perfil profesional</Link>
+      </div>
       <p className="mt-4 text-2xl font-bold text-brand-dark">
         {formatearDinero(propuesta.precio)}
       </p>

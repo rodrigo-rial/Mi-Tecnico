@@ -71,10 +71,10 @@ function MisTrabajosPage() {
 
   return (
     <LayoutPagina
-      titulo="Mis trabajos"
+      titulo={rol === 'CLIENTE' ? 'Servicios contratados' : 'Mis trabajos'}
       descripcion="Los servicios acordados entre clientes y técnicos."
       enlaces={enlacesPorRol(rol)}
-      conCerrarSesion={rol === 'TECNICO'}
+      conCerrarSesion
     >
       {enCarga && <Spinner texto="Cargando tus trabajos..." />}
 
@@ -89,7 +89,7 @@ function MisTrabajosPage() {
 
       {!enCarga && !error && trabajos.length === 0 && (
         <EstadoVacio
-          titulo="Todavía no tenés trabajos"
+          titulo={rol === 'CLIENTE' ? 'Todavía no contrataste servicios' : 'Todavía no tenés trabajos'}
           descripcion={
             rol === 'TECNICO'
               ? 'Cuando un cliente acepte una de tus propuestas, el trabajo aparece acá.'

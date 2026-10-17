@@ -19,7 +19,8 @@ import {
 } from '../utils/navegacion'
 import { accionesDisponibles, armarPasos } from '../utils/trabajos'
 import CodigoSeguridadTecnico from '../components/token/CodigoSeguridadTecnico'
-
+import FormularioValidarCodigo from '../components/token/FormularioValidarCodigo'
+import PanelReputacionTrabajo from '../components/reputacion/PanelReputacionTrabajo'
 
 const CLASE_BOTON_ENLACE = 'mt-button inline-flex items-center justify-center'
 
@@ -102,7 +103,10 @@ function TrabajoDetallePage() {
   }
 
   const rol = usuario?.rol
-  const acciones = trabajo ? accionesDisponibles(trabajo.estado, rol) : []
+  const acciones = trabajo ? accionesDisponibles(trabajo.estado, rol).map((item) =>
+    trabajo.urgencia_id && rol === 'TECNICO' && item.estado === 'cancelado'
+      ? { ...item, mensaje: 'Se cancelará tu visita y buscaremos otro técnico para el cliente. Tu disponibilidad seguirá desactivada.' }
+      : item) : []
   const enCarga = cargando || cargandoUsuario
 
   return (
@@ -110,11 +114,11 @@ function TrabajoDetallePage() {
       titulo="Seguimiento del trabajo"
       descripcion="Mirá en qué etapa está el servicio."
       enlaces={enlacesPorRol(rol)}
-      conCerrarSesion={rol === 'TECNICO'}
+      conCerrarSesion
     >
       <p>
         <Link to={RUTA_TRABAJOS} className="text-sm font-semibold text-brand hover:underline">
-          ← Volver a mis trabajos
+          ← {rol === 'CLIENTE' ? 'Volver a servicios contratados' : 'Volver a mis trabajos'}
         </Link>
       </p>
 
@@ -194,6 +198,7 @@ function TrabajoDetallePage() {
               El pago se acuerda directamente entre las partes, fuera de MiTécnico.
             </p>
 
+            {trabajo.urgencia_id && <div className="rounded-lg bg-amber-50 p-3 space-y-2"><p className="font-semibold">Visita urgente · $40.000</p><p className="text-sm">El precio corresponde a la visita. Reparaciones y materiales adicionales se acuerdan aparte.</p>{rol === 'CLIENTE' && <Link className="text-brand" to="/cliente/urgencias">Ver estado de la urgencia y reemplazos →</Link>}</div>}
             {/* CÓDIGO DE SEGURIDAD PARA EL TÉCNICO */}
             {rol === 'TECNICO' && (trabajo.estado === 'pendiente' || trabajo.estado === 'en_proceso') && (
               <div className="mt-4 border-t border-slate-200 pt-4">
@@ -202,6 +207,17 @@ function TrabajoDetallePage() {
             )}
 
 
+            {rol === 'CLIENTE' && trabajo.estado === 'pendiente' && (
+              <div className="mt-4 border-t border-slate-200 pt-4">
+                <FormularioValidarCodigo trabajoId={id} onValidado={() => {
+                  setAviso('Código validado. El trabajo está en proceso.')
+                  reintentar()
+                }} />
+              </div>
+            )}
+            {rol === 'TECNICO' && trabajo.estado === 'pendiente' && (
+              <button type="button" className="mt-button" onClick={reintentar}>Actualizar estado</button>
+            )}
             {rol === 'CLIENTE' && (
               <p>
                 <Link
@@ -220,6 +236,12 @@ function TrabajoDetallePage() {
             </h2>
             <LineaTiempo pasos={armarPasos(trabajo)} />
           </section>
+
+          {usuario && (
+            <section className="mt-card">
+              <PanelReputacionTrabajo trabajo={trabajo} usuarioId={usuario.id} />
+            </section>
+          )}
 
           {acciones.length > 0 && (
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">

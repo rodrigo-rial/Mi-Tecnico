@@ -1,3 +1,4 @@
+import Badge from '../components/comunes/Badge'
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
@@ -6,20 +7,19 @@ import LayoutPagina from '../components/comunes/LayoutPagina'
 import MensajeError from '../components/comunes/MensajeError'
 import Spinner from '../components/comunes/Spinner'
 import SolicitudCard from '../components/solicitudes/SolicitudCard'
+import { solicitarAutenticado } from '../services/http'
 import { listarSolicitudes } from '../services/solicitudesApi'
 import { mensajeError } from '../utils/errores'
 import { ENLACES_CLIENTE } from '../utils/navegacion'
 
 const FILTROS = [
   { valor: '', texto: 'Todas' },
+  { valor: 'buscando', texto: 'Buscando técnico' },
   { valor: 'publicada', texto: 'Publicadas' },
   { valor: 'asignada', texto: 'Asignadas' },
   { valor: 'finalizada', texto: 'Finalizadas' },
   { valor: 'cancelada', texto: 'Canceladas' },
 ]
-
-const CLASE_BOTON_ENLACE =
-  'mt-button inline-flex items-center justify-center'
 
 function SolicitudesClientePage() {
   const navigate = useNavigate()
@@ -30,6 +30,7 @@ function SolicitudesClientePage() {
   const [error, setError] = useState('')
   const [intento, setIntento] = useState(0)
   const [filtro, setFiltro] = useState('')
+  const [busqueda, setBusqueda] = useState('')
   const [aviso] = useState(location.state?.mensaje ?? '')
 
   // El aviso viene en el estado de la navegación: se limpia para que no
@@ -43,26 +44,38 @@ function SolicitudesClientePage() {
   useEffect(() => {
     let pantallaActiva = true
 
-    listarSolicitudes()
-      .then((datos) => {
+    let timer
+    async function cargar() {
+      try {
+        const [normales, urgencias] = await Promise.all([listarSolicitudes(), solicitarAutenticado('/urgencias/')])
+        // Los intentos de asignación pertenecen a un solo pedido urgente.
+        const intentos = new Set(urgencias.flatMap((u) => u.asignaciones.map((a) => a.solicitud)))
+        const datos = [
+          ...normales.filter((s) => !intentos.has(s.id)),
+          ...urgencias.map((u) => ({ ...u, id: `urgencia-${u.id}`, urgencia: true,
+            titulo: `Urgencia: ${u.especialidad_nombre}`, created_at: u.creada_en })),
+        ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         if (!pantallaActiva) return
         setSolicitudes(datos)
         setError('')
-      })
-      .catch((errorCarga) => {
+      } catch (errorCarga) {
         if (!pantallaActiva) return
         if (errorCarga.status === 401) {
           navigate('/login', { replace: true })
           return
         }
         setError(mensajeError(errorCarga))
-      })
-      .finally(() => {
-        if (pantallaActiva) setCargando(false)
-      })
-
+      } finally {
+        if (pantallaActiva) {
+          setCargando(false)
+          timer = setTimeout(cargar, 5000)
+        }
+      }
+    }
+    cargar()
     return () => {
       pantallaActiva = false
+      clearTimeout(timer)
     }
   }, [intento, navigate])
 
@@ -72,9 +85,10 @@ function SolicitudesClientePage() {
     setIntento((valor) => valor + 1)
   }
 
-  const visibles = filtro
-    ? solicitudes.filter((solicitud) => solicitud.estado === filtro)
-    : solicitudes
+  const normalizar = (valor) => (valor ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  const visibles = solicitudes.filter((solicitud) =>
+    (!filtro || solicitud.estado === filtro) &&
+    normalizar([solicitud.titulo, solicitud.especialidad_nombre, solicitud.zona_nombre].join(' ')).includes(normalizar(busqueda.trim())))
 
   return (
     <LayoutPagina
@@ -82,6 +96,9 @@ function SolicitudesClientePage() {
       descripcion="Seguí el estado de los servicios que publicaste."
       enlaces={ENLACES_CLIENTE}
     >
+      <div className="client-action-row flex-wrap gap-3"><Link className="inline-flex items-center rounded-lg bg-red-700 px-5 py-3 font-semibold text-white hover:bg-red-800" to="/cliente/urgencias">Necesito atención urgente</Link><Link className="mt-button inline-flex items-center gap-3" to="/cliente/solicitudes/nueva"><span aria-hidden="true">+</span> Nueva solicitud</Link></div>
+      {!cargando && !error && <div className="activity-summary" aria-label="Resumen de solicitudes">{[{ valor: 'buscando', texto: 'Buscando técnico' }, { valor: 'publicada', texto: 'Esperando propuestas' }, { valor: 'asignada', texto: 'Servicios coordinados' }, { valor: 'finalizada', texto: 'Solicitudes finalizadas' }].map(({ valor, texto }) => <button key={valor} type="button" aria-pressed={filtro === valor} onClick={() => setFiltro(valor)} className={filtro === valor ? 'summary-active' : ''}><strong>{solicitudes.filter((solicitud) => solicitud.estado === valor).length}</strong><span>{texto}</span><span aria-hidden="true">↗</span></button>)}</div>}
+      <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-bold">Solicitudes</h2><Link className="text-brand text-sm font-semibold" to="/trabajos">Ver servicios contratados →</Link></div>
       {aviso && (
         <p role="status" className="rounded-lg bg-emerald-100 p-3 text-sm font-medium text-emerald-800">
           {aviso}
@@ -103,15 +120,12 @@ function SolicitudesClientePage() {
         <EstadoVacio
           titulo="Todavía no publicaste solicitudes"
           descripcion="Publicá la primera y recibí propuestas de técnicos verificados."
-        >
-          <Link to="/cliente/solicitudes/nueva" className={CLASE_BOTON_ENLACE}>
-            Publicar solicitud
-          </Link>
-        </EstadoVacio>
+        />
       )}
 
       {!cargando && !error && solicitudes.length > 0 && (
         <>
+          <label className="block text-sm font-medium">Buscar en mis solicitudes<input type="search" className="mt-input" placeholder="Por título, servicio o zona" value={busqueda} onChange={(event) => setBusqueda(event.target.value)} /></label>
           <div role="group" aria-label="Filtrar por estado" className="flex flex-wrap gap-2">
             {FILTROS.map(({ valor, texto }) => (
               <button
@@ -132,13 +146,19 @@ function SolicitudesClientePage() {
 
           {visibles.length === 0 ? (
             <EstadoVacio
-              titulo="No hay solicitudes con ese estado"
-              descripcion="Probá con otro filtro."
+              titulo="No encontramos solicitudes con esos filtros"
+              descripcion="Probá con otro estado o cambiá el texto de búsqueda."
             />
           ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 xl:grid-cols-2">
               {visibles.map((solicitud) => (
-                <SolicitudCard key={solicitud.id} solicitud={solicitud} />
+                solicitud.urgencia ? <section key={solicitud.id} className="mt-card space-y-3">
+                  <div className="flex flex-wrap justify-between gap-2"><h3 className="font-bold text-lg">{solicitud.titulo}</h3><div className="flex flex-wrap justify-end gap-2"><Badge texto="Urgente" tono="error" /><Badge estado={solicitud.estado === 'buscando' ? 'pendiente' : solicitud.estado} texto={{ buscando: 'Buscando técnico', asignada: 'Técnico asignado', finalizada: 'Finalizada', cancelada: 'Cancelada' }[solicitud.estado]} /></div></div>
+                  <p className="text-sm text-slate-600">{solicitud.zona_nombre}</p>
+                  <p>{solicitud.descripcion}</p>
+                  <p className="text-sm">Visita: $40.000 · Adicionales a acordar</p>
+                  <Link className="text-brand font-semibold" to="/cliente/urgencias">Ver seguimiento de la urgencia →</Link>
+                </section> : <SolicitudCard key={solicitud.id} solicitud={solicitud} />
               ))}
             </div>
           )}
