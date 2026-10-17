@@ -109,6 +109,26 @@ class UrgenciasTests(Escenario, APITestCase):
         self.tecnico.save()
         self.assertEqual(services.crear(self.cliente, self.datos).estado, "buscando")
 
+    def test_aprobacion_revocada_no_asigna_aunque_siga_disponible(self):
+        self.disponible()
+        PerfilTecnico.objects.filter(usuario=self.tecnico).update(estado_validacion="RECHAZADO")
+        urgencia = services.crear(self.cliente, self.datos)
+        services.procesar_pendientes()
+        urgencia.refresh_from_db()
+        self.assertEqual(urgencia.estado, "buscando")
+        self.assertFalse(urgencia.asignaciones.exists())
+        self.assertFalse(TokenTrabajo.objects.exists())
+
+    def test_cliente_bloqueado_no_recibe_asignacion_pendiente(self):
+        urgencia = services.crear(self.cliente, self.datos)
+        self.cliente.is_active = False
+        self.cliente.save(update_fields=["is_active"])
+        self.disponible()
+        urgencia.refresh_from_db()
+        self.assertEqual(urgencia.estado, "cancelada")
+        self.assertFalse(urgencia.asignaciones.exists())
+        self.assertTrue(Disponibilidad.objects.get(tecnico=self.tecnico).activa)
+
     def test_zona_y_especialidad_deben_coincidir(self):
         self.disponible()
         PerfilTecnico.objects.get(usuario=self.tecnico).zonas.clear()
