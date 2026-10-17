@@ -1,3 +1,4 @@
+import Avatar from '../components/comunes/Avatar'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import LayoutPagina from '../components/comunes/LayoutPagina'
@@ -22,6 +23,7 @@ function Perfil({ id }) {
   if (!datos) return <p role="status">Cargando perfil…</p>
   return <>
     <section className="mt-card space-y-4 break-words">
+      <Avatar ruta={datos.foto_perfil} nombre={datos.nombre} className="h-24 w-24" />
       <div className="flex flex-wrap justify-between gap-3"><h2 className="text-2xl font-bold">{datos.nombre}</h2><span className="rounded-full bg-emerald-100 px-3 py-2 text-sm text-emerald-800">Técnico aprobado</span></div>
       <p className="whitespace-pre-line">{datos.descripcion || 'Sin descripción profesional.'}</p>
       <Link className="mt-button inline-flex" to={`/cliente/solicitudes/nueva?tecnico=${id}`}>Solicitar servicio</Link>

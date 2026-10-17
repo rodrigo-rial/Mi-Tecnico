@@ -1,3 +1,4 @@
+import Avatar from '../components/comunes/Avatar'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import LayoutPagina from '../components/comunes/LayoutPagina'
@@ -25,6 +26,7 @@ function Resultados({ filtros }) {
   return <><p role="status">{datos.count} técnicos encontrados</p>
     {!datos.results.length && <p className="mt-card">No encontramos técnicos con esos filtros. Probá otra zona o especialidad.</p>}
     <div className="grid gap-4 md:grid-cols-2">{datos.results.map((tecnico) => <article className="mt-card space-y-3 break-words" key={tecnico.id}>
+      <Avatar ruta={tecnico.foto_perfil} nombre={tecnico.nombre} />
       <h2 className="text-xl font-bold">{tecnico.nombre}</h2><p className="text-sm text-emerald-700">Técnico aprobado</p>
       <p>{tecnico.especialidades.join(' · ')}</p><p className="text-sm text-slate-600">{tecnico.zonas.join(' · ')}</p>
       <p>{tecnico.cantidad ? `${Number(tecnico.promedio).toLocaleString('es-AR', { maximumFractionDigits: 1 })} / 5 · ${tecnico.cantidad} calificaciones` : 'Sin calificaciones todavía.'}</p>

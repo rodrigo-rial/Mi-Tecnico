@@ -14,6 +14,12 @@ class Filtros(serializers.Serializer):
 class Ficha(serializers.ModelSerializer):
     id = serializers.IntegerField(source="usuario_id")
     nombre = serializers.SerializerMethodField()
+    foto_perfil = serializers.SerializerMethodField()
+
+    def get_foto_perfil(self, obj):
+        from usuarios.fotos import ruta_foto
+        return ruta_foto(obj.usuario)
+
     especialidades = serializers.SlugRelatedField(many=True, read_only=True, slug_field="nombre")
     zonas = serializers.SlugRelatedField(many=True, read_only=True, slug_field="nombre")
     promedio = serializers.FloatField(read_only=True, allow_null=True)
@@ -24,7 +30,7 @@ class Ficha(serializers.ModelSerializer):
 
     class Meta:
         model = PerfilTecnico
-        fields = ["id", "nombre", "descripcion", "especialidades", "zonas", "promedio", "cantidad"]
+        fields = ["id", "nombre", "descripcion", "especialidades", "zonas", "promedio", "cantidad", "foto_perfil"]
 
 
 class Paginas(PageNumberPagination):

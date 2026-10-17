@@ -48,7 +48,7 @@ class SolicitudesDirigidasTests(APITestCase):
         respuesta = self.client.get(f"/api/tecnicos/catalogo/?zona={self.z.pk}&especialidad={self.e.pk}")
         self.assertEqual(respuesta.status_code, 200)
         self.assertEqual([r["id"] for r in respuesta.data["results"]], [self.tecnico.pk])
-        self.assertEqual(set(respuesta.data["results"][0]), {"id", "nombre", "descripcion", "especialidades", "zonas", "promedio", "cantidad"})
+        self.assertEqual(set(respuesta.data["results"][0]), {"id", "nombre", "descripcion", "especialidades", "zonas", "promedio", "cantidad", "foto_perfil"})
         self.assertEqual(self.client.get("/api/tecnicos/catalogo/?zona=abc").status_code, 400)
 
     def test_solicitud_normal_sigue_visible_a_compatibles(self):
