@@ -1,3 +1,4 @@
+import PerfilProfesionalPage from './pages/PerfilProfesionalPage'
 import {
   Navigate,
   Route,
@@ -54,6 +55,10 @@ function App() {
           <RutaProtegida rolesPermitidos={['CLIENTE']} />
         )}
       >
+        <Route
+          path="/cliente/tecnicos/:id"
+          element={<PerfilProfesionalPage />}
+        />
         <Route
           path="/cliente/solicitudes"
           element={<SolicitudesClientePage />}

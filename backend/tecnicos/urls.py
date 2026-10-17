@@ -4,11 +4,13 @@ from .views import (
     DocumentacionTecnicoView,
     EspecialidadListView,
     PerfilTecnicoView,
+    PerfilProfesionalView,
     ZonaListView,
 )
 
 
 urlpatterns = [
+    path("<int:usuario_id>/profesional/", PerfilProfesionalView.as_view(), name="perfil_profesional"),
     path(
         "especialidades/",
         EspecialidadListView.as_view(),
