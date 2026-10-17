@@ -24,6 +24,7 @@ function Perfil({ id }) {
     <section className="mt-card space-y-4 break-words">
       <div className="flex flex-wrap justify-between gap-3"><h2 className="text-2xl font-bold">{datos.nombre}</h2><span className="rounded-full bg-emerald-100 px-3 py-2 text-sm text-emerald-800">Técnico aprobado</span></div>
       <p className="whitespace-pre-line">{datos.descripcion || 'Sin descripción profesional.'}</p>
+      <Link className="mt-button inline-flex" to={`/cliente/solicitudes/nueva?tecnico=${id}`}>Solicitar servicio</Link>
       <h3 className="font-semibold">Especialidades</h3><div className="flex flex-wrap gap-2">{datos.especialidades.map((nombre) => <span className="service-chip" key={nombre}>{nombre}</span>)}</div>
       <h3 className="font-semibold">Zonas de cobertura</h3><div className="flex flex-wrap gap-2">{datos.zonas.map((nombre) => <span className="coverage-chip" key={nombre}>{nombre}</span>)}</div>
     </section>

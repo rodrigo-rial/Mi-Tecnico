@@ -1,3 +1,4 @@
+import CatalogoTecnicosPage from './pages/CatalogoTecnicosPage'
 import PerfilProfesionalPage from './pages/PerfilProfesionalPage'
 import {
   Navigate,
@@ -55,6 +56,10 @@ function App() {
           <RutaProtegida rolesPermitidos={['CLIENTE']} />
         )}
       >
+        <Route
+          path="/cliente/tecnicos"
+          element={<CatalogoTecnicosPage />}
+        />
         <Route
           path="/cliente/tecnicos/:id"
           element={<PerfilProfesionalPage />}

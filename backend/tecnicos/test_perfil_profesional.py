@@ -13,7 +13,7 @@ class PerfilProfesionalTests(APITestCase):
     def test_perfil_solo_informacion_profesional(self):
         respuesta = self.client.get(self.url)
         self.assertEqual(respuesta.status_code, 200)
-        self.assertEqual(set(respuesta.data), {"id", "nombre", "descripcion", "especialidades", "zonas", "reputacion", "resenas", "fotos"})
+        self.assertEqual(set(respuesta.data), {"id", "nombre", "descripcion", "especialidades", "zonas", "reputacion", "resenas", "fotos", "especialidad_ids", "zona_ids"})
         self.assertEqual(respuesta.data["reputacion"]["cantidad"], 0)
         self.assertEqual(respuesta.data["resenas"], [])
 

@@ -109,6 +109,8 @@ class PerfilProfesionalView(APIView):
             "descripcion": perfil.descripcion,
             "especialidades": list(perfil.especialidades.values_list("nombre", flat=True)),
             "zonas": list(perfil.zonas.values_list("nombre", flat=True)),
+            "especialidad_ids": list(perfil.especialidades.filter(activa=True).values_list("id", flat=True)),
+            "zona_ids": list(perfil.zonas.filter(activa=True).values_list("id", flat=True)),
             "reputacion": resumen,
             "resenas": list(calificaciones.values("id", "puntaje", "comentario", "created_at")[:50]),
             "fotos": [{"id": foto.pk, "imagen": request.build_absolute_uri(foto.imagen.url),

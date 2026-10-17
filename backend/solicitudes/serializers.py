@@ -15,6 +15,12 @@ def a_error_drf(exc):
 
 
 class SolicitudSerializer(serializers.ModelSerializer):
+    destinatario_nombre = serializers.SerializerMethodField()
+
+    def get_destinatario_nombre(self, obj):
+        tecnico = obj.tecnico_destinatario
+        return (tecnico.get_full_name() or tecnico.username) if tecnico else None
+
     fotos = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     imagenes = serializers.ListField(child=serializers.ImageField(), max_length=5, required=False, write_only=True)
 
@@ -66,6 +72,8 @@ class SolicitudSerializer(serializers.ModelSerializer):
             "created_at",
             "fotos",
             "imagenes",
+            "tecnico_destinatario",
+            "destinatario_nombre",
         ]
         read_only_fields = ["id", "cliente", "estado", "created_at"]
 

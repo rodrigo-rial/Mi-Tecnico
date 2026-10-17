@@ -9,7 +9,10 @@ from .views import (
 )
 
 
+from .catalogo import CatalogoTecnicosView
+
 urlpatterns = [
+    path("catalogo/", CatalogoTecnicosView.as_view(), name="catalogo_tecnicos"),
     path("<int:usuario_id>/profesional/", PerfilProfesionalView.as_view(), name="perfil_profesional"),
     path(
         "especialidades/",

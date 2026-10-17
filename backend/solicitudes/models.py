@@ -26,6 +26,10 @@ class Solicitud(models.Model):
         on_delete=models.PROTECT,
         related_name="solicitudes",
     )
+    tecnico_destinatario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.PROTECT, related_name="solicitudes_dirigidas",
+    )
     titulo = models.CharField(max_length=150)
     descripcion = models.TextField()
     especialidad = models.ForeignKey(
@@ -58,6 +62,14 @@ class Solicitud(models.Model):
                 {"cliente": "Solo un usuario con rol CLIENTE puede crear solicitudes."}
             )
 
+        if self.tecnico_destinatario_id:
+            tecnico = self.tecnico_destinatario
+            perfil = perfil_tecnico(tecnico)
+            if not tecnico.is_active or tecnico.rol != ROL_TECNICO or perfil is None or perfil.estado_validacion != VERIFICACION_APROBADO:
+                raise ValidationError({"tecnico_destinatario": "El técnico no está disponible para recibir pedidos."})
+            if not perfil.especialidades.filter(pk=self.especialidad_id, activa=True).exists() or not perfil.zonas.filter(pk=self.zona_id, activa=True).exists():
+                raise ValidationError({"tecnico_destinatario": "Elegí una especialidad y zona que atienda este técnico."})
+
     def es_propietario(self, usuario):
         return usuario.pk == self.cliente_id
  
@@ -84,7 +96,7 @@ class Solicitud(models.Model):
             estado=cls.Estado.PUBLICADA,
             especialidad__in=perfil.especialidades.all(),
             zona__in=perfil.zonas.all(),
-        ).select_related("especialidad", "zona", "cliente")
+        ).filter(Q(tecnico_destinatario__isnull=True) | Q(tecnico_destinatario=tecnico)).select_related("especialidad", "zona", "cliente", "tecnico_destinatario")
 
 
 class Propuesta(models.Model):
@@ -148,6 +160,8 @@ class Propuesta(models.Model):
         if getattr(self.tecnico, "rol", None) != ROL_TECNICO:
             raise ValidationError({"tecnico": "Solo un TECNICO puede enviar propuestas."})
 
+        if self.solicitud.tecnico_destinatario_id not in (None, self.tecnico_id):
+            raise ValidationError("Esta solicitud está dirigida a otro técnico.")
         perfil = perfil_tecnico(self.tecnico)
         if perfil is None or perfil.estado_validacion != VERIFICACION_APROBADO:
             raise ValidationError(
