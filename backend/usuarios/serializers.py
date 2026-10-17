@@ -22,6 +22,12 @@ class RegistroUsuarioSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("id",)
 
+    def validate_email(self, value):
+        value = value.strip().lower()
+        if Usuario.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("Este correo ya está registrado.")
+        return value
+
     def validate_rol(self, value):
         if value == Usuario.Rol.ADMINISTRADOR:
             raise serializers.ValidationError(
