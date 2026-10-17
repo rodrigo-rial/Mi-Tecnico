@@ -65,6 +65,8 @@ function ordenarErrores(error) {
 function SolicitudForm({ especialidades, zonas, onGuardar }) {
   const [valores, setValores] = useState(VALORES_INICIALES)
   const [errores, setErrores] = useState({})
+  const [imagenes, setImagenes] = useState([])
+  const [errorFotos, setErrorFotos] = useState('')
   const [enviando, setEnviando] = useState(false)
 
   function manejarCambio(evento) {
@@ -78,13 +80,14 @@ function SolicitudForm({ especialidades, zonas, onGuardar }) {
   async function manejarEnvio(evento) {
     evento.preventDefault()
 
+    if (errorFotos) return
     const erroresLocales = validar(valores)
     setErrores(erroresLocales)
     if (Object.keys(erroresLocales).length > 0) return
 
     setEnviando(true)
     try {
-      await onGuardar(armarDatos(valores))
+      await onGuardar({ ...armarDatos(valores), imagenes })
     } catch (error) {
       setErrores(ordenarErrores(error))
     } finally {
@@ -199,6 +202,20 @@ function SolicitudForm({ especialidades, zonas, onGuardar }) {
         )}
       </div>
 
+      <div className="space-y-2">
+        <label htmlFor="imagenes" className="block font-semibold">Fotos del problema (opcional)</label>
+        <input id="imagenes" type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={enviando}
+          className="block w-full rounded-lg border border-line p-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:p-3 file:font-semibold file:text-blue-700"
+          onChange={(evento) => {
+            const fotos = Array.from(evento.target.files)
+            const fallo = fotos.length > 5 ? 'Podés adjuntar hasta 5 fotos.' : fotos.some((foto) => foto.size > 5 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(foto.type)) ? 'Usá JPG, PNG o WEBP de hasta 5 MB cada una.' : ''
+            setErrorFotos(fallo)
+            setImagenes(fallo ? [] : fotos)
+          }} aria-describedby="imagenes-ayuda" />
+        <p id="imagenes-ayuda" className="text-sm text-slate-500">Hasta 5 fotos JPG, PNG o WEBP, de 5 MB cada una.</p>
+        {imagenes.length > 0 && <ul className="text-sm text-slate-600">{imagenes.map((foto, indice) => <li key={indice}>{foto.name}</li>)}</ul>}
+        {errorFotos && <p role="alert" className="text-sm text-red-700">{errorFotos}</p>}
+      </div>
       <MensajeError mensaje={errores.general} />
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

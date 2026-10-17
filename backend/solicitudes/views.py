@@ -112,3 +112,26 @@ class MisPropuestasView(APIView):
         propuestas = Propuesta.objects.filter(tecnico=request.user).select_related("solicitud__especialidad", "solicitud__zona", "tecnico")
         serializer = PropuestaSerializer(propuestas, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class FotoSolicitudView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, solicitud_id, foto_id):
+        from django.http import FileResponse, Http404
+        from .models import FotoSolicitud, Trabajo
+        solicitud = get_object_or_404(Solicitud, pk=solicitud_id)
+        user = request.user
+        permitido = solicitud.cliente_id == user.pk
+        if user.rol == Usuario.Rol.TECNICO:
+            permitido = (
+                Solicitud.compatibles_para(user).filter(pk=solicitud.pk).exists()
+                or Trabajo.objects.filter(solicitud=solicitud, tecnico=user).exists()
+            )
+        if not permitido:
+            raise Http404
+        foto = get_object_or_404(FotoSolicitud, pk=foto_id, solicitud=solicitud)
+        if not foto.imagen.storage.exists(foto.imagen.name):
+            raise Http404
+        respuesta = FileResponse(foto.imagen.open("rb"))
+        respuesta["Cache-Control"] = "private, no-store"
+        return respuesta

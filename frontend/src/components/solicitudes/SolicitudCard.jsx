@@ -1,3 +1,4 @@
+import FotosSolicitud from './FotosSolicitud'
 import { Link } from 'react-router-dom'
 
 import Badge from '../comunes/Badge'
@@ -75,6 +76,7 @@ function SolicitudCard({
         </p>
       )}
 
+      <FotosSolicitud key={solicitud.id} solicitud={solicitud} />
       {children && <div className="mt-4">{children}</div>}
     </article>
   )

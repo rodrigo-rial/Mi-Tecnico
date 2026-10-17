@@ -12,6 +12,16 @@ export function obtenerSolicitud(id) {
 // datos: { titulo, descripcion, especialidad, zona, direccion,
 //          fecha_preferida (YYYY-MM-DD, opcional), es_urgente }
 export function crearSolicitud(datos) {
+  if (datos.imagenes?.length) {
+    const formulario = new FormData()
+    for (const [clave, valor] of Object.entries(datos)) {
+      if (clave === 'imagenes') valor.forEach((foto) => formulario.append('imagenes', foto))
+      else formulario.append(clave, valor)
+    }
+    datos = formulario
+  } else {
+    datos = Object.fromEntries(Object.entries(datos).filter(([clave]) => clave !== 'imagenes'))
+  }
   return solicitarAutenticado('/solicitudes/', { method: 'POST', datos })
 }
 

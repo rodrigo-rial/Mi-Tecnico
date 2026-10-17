@@ -241,3 +241,17 @@ class Trabajo(models.Model):
             )
         self.estado = nuevo
         self.save(update_fields=["estado", "updated_at"])
+
+def ruta_foto_solicitud(instancia, nombre):
+    import uuid
+    from pathlib import Path
+    return f"solicitudes/{instancia.solicitud_id}/{uuid.uuid4().hex}{Path(nombre).suffix.lower()}"
+
+
+class FotoSolicitud(models.Model):
+    solicitud = models.ForeignKey(Solicitud, on_delete=models.CASCADE, related_name="fotos")
+    imagen = models.ImageField(upload_to=ruta_foto_solicitud)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["id"]

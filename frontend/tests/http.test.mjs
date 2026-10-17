@@ -64,3 +64,23 @@ test('no reintenta la subida si tampoco puede renovar la sesión', async (t) => 
   assert.equal(llamadas, 1)
   assert.equal(api.cierres, 1)
 })
+
+
+test('descarga una foto como blob despues de renovar el acceso', async (t) => {
+  const api = await cliente()
+  let llamadas = 0
+  t.mock.method(globalThis, 'fetch', async () => {
+    llamadas++
+    return llamadas === 1 ? respuesta(401, { detail: 'expired' }) : new Response('imagen', { headers: { 'Content-Type': 'image/png' } })
+  })
+  const blob = await api.solicitarAutenticado('/solicitudes/1/fotos/1/', { archivo: true })
+  assert.equal(blob.type, 'image/png')
+  assert.equal(await blob.text(), 'imagen')
+  assert.equal(api.renovaciones, 1)
+})
+
+test('conserva errores JSON en una descarga de foto rechazada', async (t) => {
+  const api = await cliente()
+  t.mock.method(globalThis, 'fetch', async () => respuesta(404, { detail: 'No encontrado' }))
+  await assert.rejects(api.solicitarAutenticado('/solicitudes/1/fotos/1/', { archivo: true }), { status: 404, message: 'No encontrado' })
+})
