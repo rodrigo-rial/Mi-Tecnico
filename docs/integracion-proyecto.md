@@ -1,5 +1,9 @@
 # Integración del proyecto — 16/10/2026
 
+> Nota de actualización (18/10/2026): este documento conserva el registro de la integración inicial. Sus pendientes y referencias a ramas son históricos. Consultar `cierre-alcance-v2.md` y la guía `docs/instalacion-local.md` para el estado y los pasos actuales.
+
+> Nota de actualización (18/10/2026): este documento conserva el registro de la integración inicial. Sus pendientes y referencias a ramas son históricos. Consultar `cierre-alcance-v2.md` y la guía `docs/instalacion-local.md` para el estado y los pasos actuales.
+
 Rama de trabajo: `feature/integracion-proyecto`.
 
 ## Fuentes reunidas
@@ -24,7 +28,7 @@ Reconstruir backend y urgencias_worker para instalar Pillow; ejecutar `python ma
 - Edición de datos básicos de cuenta y fotografías opcionales de solicitudes.
 - Pruebas de aceptación del recorrido completo y preparación de entrega.
 
-Esta rama todavía no se publica ni se integra a develop.
+La integración se incorporó posteriormente a develop; esta frase reemplaza el estado anterior a la publicación.
 
 ## Reputación en perfiles
 Se conectó el resumen a Mi cuenta (cliente/técnico) y al perfil profesional. Incluye promedio, cantidad, estado sin calificaciones, errores y reintento. Descarta respuestas de pantallas abandonadas.
