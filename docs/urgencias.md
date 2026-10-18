@@ -9,7 +9,7 @@ La visita cuesta ARS 40.000. No es el precio de una reparación completa: materi
 ## Flujo
 
 1. El técnico aprobado activa disponibilidad desde Solicitudes. Es independiente de los datos de validación del perfil.
-2. El cliente abre Necesito atención urgente, completa los datos y confirma la tarifa.
+2. El cliente toca el botón flotante Urgencia, completa los datos y confirma la tarifa.
 3. Se busca un técnico activo, aprobado, disponible, con la especialidad y zona requeridas, sin trabajos pendientes o en proceso.
 4. Se reserva al técnico desactivando su disponibilidad y se registra solicitud, propuesta automática, trabajo y código de seguridad. La propuesta automática documenta la tarifa autorizada por ambas partes; no espera respuesta manual.
 5. El cliente valida el código cuando llega el técnico. Eso inicia el trabajo.
@@ -49,3 +49,8 @@ La restricción de base de datos evita dos urgencias activas por cliente. El tes
 ## Prueba manual
 
 Usar un técnico aprobado sin trabajos activos y un cliente de prueba. Activar disponibilidad y crear la urgencia para su especialidad/zona. Comprobar asignación, disponibilidad desactivada, código y finalización. Para probar reemplazo, activar un segundo técnico compatible antes de cancelar el primero. Sin candidatos, debe verse Buscando técnico; al activar otro, se asigna sin intervención del cliente. Cancelar desde el cliente debe detener toda búsqueda.
+
+## Documentos de cierre
+
+- [Adenda al alcance V2](adenda-alcance-v2-urgencias.md).
+- [Registro de pruebas locales](acta-verificacion-local.md).

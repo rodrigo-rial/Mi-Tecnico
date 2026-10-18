@@ -22,3 +22,10 @@ python manage.py test solicitudes.test_trabajos tokens.tests solicitudes.test_re
 ```
 
 Antes de publicar, completar una pasada en navegador con ambos roles: login, publicar, enviar propuesta, aceptar, validar codigo, finalizar, fotos y reputacion. Revisar tambien la vista movil. Las pruebas de API no verifican botones, navegacion ni distribucion visual.
+
+## Registro manual posterior
+
+El recorrido normal fue confirmado por Pablo en la instalación aislada del
+18/10/2026. Ver [acta de verificación local](acta-verificacion-local.md) para
+resultados, incidencias y límites. La comprobación en la futura URL pública
+continúa pendiente.

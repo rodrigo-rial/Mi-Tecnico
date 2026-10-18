@@ -21,14 +21,15 @@ concurrencia o entorno haya sido validada.
 ## Diferencia acordada respecto del PDF
 
 El módulo 5 del PDF indica aceptación del técnico y confirmación del cliente.
-Por decisión explícita del equipo transmitida por Pablo, la app conserva asignación
+Por decisión explícita de Pablo durante el desarrollo, la app conserva asignación
 automática por especialidad, zona y disponibilidad. La visita vale $40.000, con
 adicionales a acordar. La cancelación del técnico reinicia la búsqueda; la del
 cliente la detiene. No se calcula cercanía GPS: dentro de candidatos compatibles
 se prioriza la antigüedad de disponibilidad.
 
-Actualizar o anexar esta decisión al documento que se presente. El PDF original
-no fue modificado. No afirmar coincidencia literal con ese flujo del V2.
+La decisión queda documentada en [la adenda de urgencias](adenda-alcance-v2-urgencias.md),
+para adjuntar al alcance entregable. El PDF original no fue modificado. La adenda
+no implica aprobación formal del grupo o de la cátedra.
 
 Administración mediante Django Admin está permitida por V2.
 Catálogo de técnicos, solicitud dirigida y fotos de perfil son mejoras acordadas.
@@ -49,21 +50,25 @@ Estas son ejecuciones compartidas por el usuario; no una nueva ejecución realiz
 durante esta revisión documental. La revisión móvil fue visual, no una certificación
 de accesibilidad o compatibilidad con todos los dispositivos.
 
+## Verificación desde una copia nueva
+
+Pablo confirmó el arranque desde una base vacía y los recorridos normales y de
+urgencia en una copia aislada de la misma computadora. Ver el
+[registro completo y sus límites](acta-verificacion-local.md).
+No se afirma instalación en otra máquina ni reemplazo manual con segundo técnico.
+
 ## Pendientes concretos de entrega
 
-1. Incorporar la decisión de urgencias al alcance entregable y acordarla con el grupo.
-2. Probar la guía `docs/instalacion-local.md` desde una copia nueva en otra máquina, con base y archivos propios;
-   confirmar migraciones, zonas, especialidades, registro, aprobación y worker.
-3. Ejecutar una demostración final con ambos roles: solicitud normal, propuesta,
-   código, finalización, calificaciones y foto; urgencia sin candidatos, asignación,
-   reemplazo y cancelación. Registrar resultado y cualquier incidencia.
-4. Aplicar y revisar este parche documental, hacer commit/PR y conservar la evidencia.
-5. Si la entrega exige despliegue: preparar el entorno de producción y verificarlo.
-   Compose actual es local. Falta definir hosting, HTTPS, secretos, archivos, respaldos
-   y supervisión. No publicar todo MEDIA_ROOT.
+1. Incorporar estos documentos mediante commit/PR y presentar la adenda junto al V2.
+2. Confirmar manualmente el reemplazo de urgencia con un segundo técnico compatible.
+3. Si se exige reproducibilidad en otro equipo, repetir allí la guía de instalación;
+   la prueba registrada se hizo en la misma computadora con configuración aislada.
+4. Para despliegue público, preparar y verificar secretos, HTTPS, hosts y orígenes,
+   persistencia y permisos de archivos, respaldos y procesamiento de urgencias.
+   La alternativa gratuita todavía requiere adaptación y prueba. No publicar MEDIA_ROOT completo.
 
-## Condiciones de cierre
+## Estado de cierre
 
-La entrega local puede considerarse lista cuando la instalación desde cero y la
-demostración final estén registradas, los cambios documentales integrados y el alcance
-refleje la decisión de urgencias. Un despliegue público requiere validación aparte.
+Los recorridos locales informados están registrados y la variante de urgencias
+cuenta con una adenda. No se afirma aprobación formal de la entrega ni preparación
+completa para producción. Los pendientes anteriores conservan su estado explícito.
