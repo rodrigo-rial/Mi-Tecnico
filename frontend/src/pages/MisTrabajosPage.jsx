@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
+import Badge from '../components/comunes/Badge'
+import { solicitarAutenticado, extraerLista } from '../services/http'
 import EstadoVacio from '../components/comunes/EstadoVacio'
 import LayoutPagina from '../components/comunes/LayoutPagina'
 import MensajeError from '../components/comunes/MensajeError'
@@ -34,12 +36,30 @@ function MisTrabajosPage() {
   }, [cargandoUsuario, usuario, navigate])
 
   useEffect(() => {
+    if (!usuario) return
     let pantallaActiva = true
 
-    listarTrabajos()
-      .then((datos) => {
+    Promise.all([
+      listarTrabajos(),
+      usuario.rol === 'CLIENTE' ? solicitarAutenticado('/urgencias/').then(extraerLista) : Promise.resolve([]),
+    ])
+      .then(([datos, urgencias]) => {
         if (!pantallaActiva) return
-        setTrabajos(datos)
+        const asignados = new Set(urgencias.flatMap((u) => u.asignaciones.map((a) => String(a.trabajo))))
+        const servicios = [
+          ...datos.filter((t) => !asignados.has(String(t.id))),
+          ...urgencias.map((u) => ({
+            ...u,
+            id: `urgencia-${u.id}`,
+            urgenciaId: u.id,
+            created_at: u.creada_en,
+            estado: u.estado === 'cancelada' ? 'cancelado'
+              : u.estado === 'finalizada' ? 'finalizado'
+                : u.estado === 'asignada' && u.asignaciones.some((a) => a.estado === 'en_proceso') ? 'en_proceso' : 'pendiente',
+            buscando: u.estado === 'buscando',
+          })),
+        ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        setTrabajos(servicios)
         setError('')
       })
       .catch((errorCarga) => {
@@ -57,7 +77,7 @@ function MisTrabajosPage() {
     return () => {
       pantallaActiva = false
     }
-  }, [intento, navigate])
+  }, [intento, navigate, usuario])
 
   function reintentar() {
     setCargando(true)
@@ -126,7 +146,19 @@ function MisTrabajosPage() {
           ) : (
             <div className="grid gap-4 lg:grid-cols-2">
               {visibles.map((trabajo) => (
-                <TrabajoCard key={trabajo.id} trabajo={trabajo} />
+                trabajo.urgenciaId ? <article key={trabajo.id} className="mt-card space-y-3">
+                  <div className="flex flex-wrap justify-between gap-2">
+                    <h2 className="text-lg font-semibold">Urgencia: {trabajo.especialidad_nombre}</h2>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge texto="Urgente" tono="error" />
+                      <Badge estado={trabajo.estado} texto={trabajo.buscando ? 'Buscando técnico' : undefined} />
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-600">{trabajo.zona_nombre}</p>
+                  <p>{trabajo.descripcion}</p>
+                  <p className="text-sm">Visita: $40.000 · Adicionales a acordar</p>
+                  <Link className="text-brand font-semibold" to={`/cliente/urgencias?id=${trabajo.urgenciaId}`}>Ver seguimiento</Link>
+                </article> : <TrabajoCard key={trabajo.id} trabajo={trabajo} />
               ))}
             </div>
           )}

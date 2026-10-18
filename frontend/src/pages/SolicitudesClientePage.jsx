@@ -96,7 +96,7 @@ function SolicitudesClientePage() {
       descripcion="Seguí el estado de los servicios que publicaste."
       enlaces={ENLACES_CLIENTE}
     >
-      <div className="client-action-row flex-wrap gap-3"><Link className="inline-flex items-center rounded-lg bg-red-700 px-5 py-3 font-semibold text-white hover:bg-red-800" to="/cliente/urgencias">Necesito atención urgente</Link><Link className="mt-button inline-flex items-center gap-3" to="/cliente/solicitudes/nueva"><span aria-hidden="true">+</span> Nueva solicitud</Link></div>
+      <div className="client-action-row flex-wrap gap-3"><Link className="mt-button inline-flex items-center gap-3" to="/cliente/solicitudes/nueva"><span aria-hidden="true">+</span> Nueva solicitud</Link></div>
       {!cargando && !error && <div className="activity-summary" aria-label="Resumen de solicitudes">{[{ valor: 'buscando', texto: 'Buscando técnico' }, { valor: 'publicada', texto: 'Esperando propuestas' }, { valor: 'asignada', texto: 'Servicios coordinados' }, { valor: 'finalizada', texto: 'Solicitudes finalizadas' }].map(({ valor, texto }) => <button key={valor} type="button" aria-pressed={filtro === valor} onClick={() => setFiltro(valor)} className={filtro === valor ? 'summary-active' : ''}><strong>{solicitudes.filter((solicitud) => solicitud.estado === valor).length}</strong><span>{texto}</span><span aria-hidden="true">↗</span></button>)}</div>}
       <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-bold">Solicitudes</h2><Link className="text-brand text-sm font-semibold" to="/trabajos">Ver servicios contratados →</Link></div>
       {aviso && (
@@ -157,13 +157,18 @@ function SolicitudesClientePage() {
                   <p className="text-sm text-slate-600">{solicitud.zona_nombre}</p>
                   <p>{solicitud.descripcion}</p>
                   <p className="text-sm">Visita: $40.000 · Adicionales a acordar</p>
-                  <Link className="text-brand font-semibold" to="/cliente/urgencias">Ver seguimiento de la urgencia →</Link>
+                  <Link className="text-brand font-semibold" to={`/cliente/urgencias?id=${String(solicitud.id).replace("urgencia-", "")}`}>Ver seguimiento de la urgencia →</Link>
                 </section> : <SolicitudCard key={solicitud.id} solicitud={solicitud} />
               ))}
             </div>
           )}
         </>
       )}
+      <div className="urgency-floating-space" aria-hidden="true" />
+      <Link className="urgency-floating-button" to="/cliente/urgencias" aria-label="Pedir atención urgente">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 17v-6a6 6 0 0 1 12 0v6M4 17h16v4H4zM12 1v1M3 4l2 2M21 4l-2 2" /><path d="M12 9v4" /><circle cx="12" cy="15" r=".5" fill="currentColor" /></svg>
+        <span>Urgencia</span>
+      </Link>
     </LayoutPagina>
   )
 }
