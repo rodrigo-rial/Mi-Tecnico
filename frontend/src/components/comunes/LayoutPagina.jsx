@@ -43,8 +43,7 @@ export default function LayoutPagina({ titulo, descripcion, enlaces = [], conCer
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m3 4.5 3 3 3-3" /></svg>
           </button>
           {abierto && <div id={menuId} className="account-menu-panel">
-            <Link to="/cuenta" onClick={() => setAbierto(false)}>Ver mi cuenta</Link>
-            {tecnico && <Link to="/tecnico" onClick={() => setAbierto(false)}>Mi perfil</Link>}
+            <Link to="/cuenta" onClick={() => setAbierto(false)}>Mi cuenta</Link>
             {conCerrarSesion && <button type="button" onClick={() => { cerrarSesion(); setAbierto(false); navigate('/login', { replace: true }) }}>Cerrar sesión</button>}
           </div>}
         </div>

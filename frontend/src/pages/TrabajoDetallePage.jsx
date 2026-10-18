@@ -198,7 +198,7 @@ function TrabajoDetallePage() {
               El pago se acuerda directamente entre las partes, fuera de MiTécnico.
             </p>
 
-            {trabajo.urgencia_id && <div className="rounded-lg bg-amber-50 p-3 space-y-2"><p className="font-semibold">Visita urgente · $40.000</p><p className="text-sm">El precio corresponde a la visita. Reparaciones y materiales adicionales se acuerdan aparte.</p>{rol === 'CLIENTE' && <Link className="text-brand" to="/cliente/urgencias">Ver estado de la urgencia y reemplazos →</Link>}</div>}
+            {trabajo.urgencia_id && <div className="rounded-lg bg-amber-50 p-3 space-y-2"><p className="font-semibold">Visita urgente · $40.000</p><p className="text-sm">El precio corresponde a la visita. Reparaciones y materiales adicionales se acuerdan aparte.</p>{rol === 'CLIENTE' && <Link className="text-brand" to={`/cliente/urgencias?id=${trabajo.urgencia_id}`}>Ver estado de la urgencia y reemplazos →</Link>}</div>}
             {/* CÓDIGO DE SEGURIDAD PARA EL TÉCNICO */}
             {rol === 'TECNICO' && (trabajo.estado === 'pendiente' || trabajo.estado === 'en_proceso') && (
               <div className="mt-4 border-t border-slate-200 pt-4">

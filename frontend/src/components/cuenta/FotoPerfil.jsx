@@ -1,34 +1,48 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import Avatar from '../comunes/Avatar'
 import { solicitarAutenticado } from '../../services/http'
 
-export default function FotoPerfil({ usuario, onCambio }) {
-  const [archivo, setArchivo] = useState(null)
+export default function FotoPerfil({ usuario, onCambio, onMensaje }) {
+  const selector = useRef(null)
+  const guardando = useRef(false)
   const [ocupado, setOcupado] = useState(false)
-  const [mensaje, setMensaje] = useState('')
-  const [error, setError] = useState('')
-  const [version, setVersion] = useState(0)
-  async function guardar(quitar = false) {
-    if (!quitar && !archivo) return
-    setOcupado(true); setError(''); setMensaje('')
+  const nombre = [usuario.first_name, usuario.last_name].filter(Boolean).join(' ') || usuario.username
+
+  async function guardar(archivo, quitar = false) {
+    if (guardando.current || (!quitar && !archivo)) return
+    if (archivo && (archivo.size > 5 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(archivo.type))) {
+      onMensaje({ error: true, texto: 'Usá JPG, PNG o WEBP de hasta 5 MB.' })
+      return
+    }
+    guardando.current = true
+    setOcupado(true)
+    onMensaje({ error: false, texto: 'Guardando foto…' })
     try {
       const datos = new FormData()
-      if (!quitar) datos.append('imagen', archivo)
-      const resultado = await solicitarAutenticado('/usuarios/actual/foto/', { method: quitar ? 'DELETE' : 'POST', ...(quitar ? {} : { datos }) })
+      if (archivo) datos.append('imagen', archivo)
+      const resultado = await solicitarAutenticado('/usuarios/actual/foto/', {
+        method: quitar ? 'DELETE' : 'POST', ...(quitar ? {} : { datos }),
+      })
       onCambio({ ...usuario, ...resultado })
-      setArchivo(null); setVersion(version + 1)
-      setMensaje(quitar ? 'Foto quitada.' : 'Foto actualizada.')
-    } catch (fallo) { setError(fallo.message) } finally { setOcupado(false) }
+      onMensaje({ error: false, texto: quitar ? 'Foto quitada.' : 'Foto actualizada.' })
+    } catch (fallo) {
+      onMensaje({ error: true, texto: fallo.message })
+    } finally {
+      guardando.current = false
+      setOcupado(false)
+    }
   }
-  return <section className="mt-card space-y-3"><h2 className="text-lg font-bold">Foto de perfil</h2>
-    <label htmlFor="foto-perfil" className="block">Elegir foto (opcional)</label>
-    <input key={version} id="foto-perfil" type="file" accept="image/jpeg,image/png,image/webp" className="mt-file" disabled={ocupado} aria-describedby="foto-ayuda" onChange={(event) => {
-      const elegida = event.target.files[0]
-      setMensaje(''); setError('')
-      if (elegida && (elegida.size > 5 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(elegida.type))) { setArchivo(null); setError('Usá JPG, PNG o WEBP de hasta 5 MB.'); return }
-      setArchivo(elegida || null)
+
+  return <div className="profile-photo-control">
+    <input ref={selector} type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={ocupado} onChange={(event) => {
+      const archivo = event.target.files?.[0]
+      event.target.value = ''
+      if (archivo) guardar(archivo)
     }} />
-    <p id="foto-ayuda" className="text-sm text-slate-500">JPG, PNG o WEBP, hasta 5 MB. Se recorta al centro. La foto del técnico se muestra en su perfil y catálogo.</p>
-    <div className="flex flex-wrap gap-3"><button type="button" className="mt-button" disabled={ocupado || !archivo} onClick={() => guardar()}>{ocupado ? 'Guardando…' : 'Guardar foto'}</button>{usuario.foto_perfil && <button type="button" className="secondary-button" disabled={ocupado} onClick={() => guardar(true)}>Quitar foto</button>}</div>
-    {error && <p role="alert" className="text-red-700">{error}</p>}{mensaje && <p role="status" className="text-emerald-700">{mensaje}</p>}
-  </section>
+    <button type="button" className="profile-photo-button" disabled={ocupado} aria-busy={ocupado} aria-label={ocupado ? 'Guardando foto de perfil' : 'Cambiar foto de perfil'} title="Cambiar foto de perfil" onClick={() => selector.current?.click()}>
+      <Avatar ruta={usuario.foto_perfil} nombre={nombre} className="profile-avatar" />
+      <span className="profile-photo-camera" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 6h5l2-3h4l2 3h5v15H3z" /><circle cx="12" cy="13" r="4" /></svg></span>
+    </button>
+    {usuario.foto_perfil && <button type="button" className="profile-photo-remove" disabled={ocupado} onClick={() => guardar(null, true)}>Quitar foto</button>}
+  </div>
 }
