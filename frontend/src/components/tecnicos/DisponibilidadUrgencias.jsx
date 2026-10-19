@@ -1,3 +1,4 @@
+import { formatearDinero } from '../../utils/formato'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { solicitarAutenticado } from '../../services/http'
@@ -101,7 +102,7 @@ export default function DisponibilidadUrgencias() {
       </div>
       {mostrarInfo && (
         <div id="informacion-urgencias" className="rounded-xl bg-canvas p-4 text-sm space-y-2">
-          <p className="font-semibold">Visita: $40.000</p>
+          <p className="font-semibold">Visita: {formatearDinero(datos?.tarifa_visita)}</p>
           <p>
             Al activarlo, aceptás recibir visitas asignadas automáticamente según tus zonas y
             especialidades. Los materiales y trabajos adicionales se acuerdan con el cliente.

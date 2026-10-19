@@ -65,11 +65,18 @@ class DisponibleView(APIView):
             raise APIPermissionDenied("Solo técnicos.")
         activa = Disponibilidad.objects.filter(tecnico=request.user, activa=True).exists()
         trabajo = Trabajo.objects.filter(tecnico=request.user, estado__in=["pendiente", "en_proceso"], asignacion_urgente__isnull=False).first()
-        return Response({"activa": activa, "habilitado": services.elegible(request.user), "trabajo": trabajo.pk if trabajo else None})
+        return Response({"tarifa_visita": str(services.TARIFA), "activa": activa, "habilitado": services.elegible(request.user), "trabajo": trabajo.pk if trabajo else None})
     def patch(self, request):
         class EntradaDisponibilidad(serializers.Serializer):
             activa = serializers.BooleanField()
         entrada = EntradaDisponibilidad(data=request.data)
         entrada.is_valid(raise_exception=True)
         d = ejecutar(services.cambiar_disponibilidad, request.user, entrada.validated_data["activa"])
-        return Response({"activa": d.activa, "habilitado": services.elegible(request.user)})
+        return Response({"tarifa_visita": str(services.TARIFA), "activa": d.activa, "habilitado": services.elegible(request.user)})
+
+
+class TarifaUrgenciaView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({"tarifa_visita": str(services.TARIFA)})

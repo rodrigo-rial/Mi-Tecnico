@@ -206,7 +206,9 @@ function TrabajoDetallePage() {
 
             {trabajo.urgencia_id && (
               <div className="rounded-lg bg-amber-50 p-3 space-y-2">
-                <p className="font-semibold">Visita urgente · $40.000</p>
+                <p className="font-semibold">
+                  Visita urgente · {formatearDinero(trabajo.precio_acordado)}
+                </p>
                 <p className="text-sm">
                   El precio corresponde a la visita. Reparaciones y materiales adicionales se
                   acuerdan aparte.

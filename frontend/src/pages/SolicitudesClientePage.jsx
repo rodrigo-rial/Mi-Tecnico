@@ -1,3 +1,4 @@
+import { formatearDinero } from '../utils/formato'
 import Badge from '../components/comunes/Badge'
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -233,7 +234,9 @@ function SolicitudesClientePage() {
                     </div>
                     <p className="text-sm text-slate-600">{solicitud.zona_nombre}</p>
                     <p>{solicitud.descripcion}</p>
-                    <p className="text-sm">Visita: $40.000 · Adicionales a acordar</p>
+                    <p className="text-sm">
+                      Visita: {formatearDinero(solicitud.tarifa_visita)} · Adicionales a acordar
+                    </p>
                     <Link
                       className="text-brand font-semibold"
                       to={`/cliente/urgencias?id=${String(solicitud.id).replace('urgencia-', '')}`}

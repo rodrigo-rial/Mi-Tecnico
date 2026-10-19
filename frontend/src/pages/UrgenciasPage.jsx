@@ -1,3 +1,4 @@
+import { formatearDinero } from '../utils/formato'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import LayoutPagina from '../components/comunes/LayoutPagina'
@@ -17,6 +18,7 @@ export default function UrgenciasPage() {
   const [pedidos, setPedidos] = useState([])
   const [especialidades, setEspecialidades] = useState([])
   const [zonas, setZonas] = useState([])
+  const [tarifa, setTarifa] = useState(null)
   const [datos, setDatos] = useState({ especialidad: '', zona: '', direccion: '', descripcion: '' })
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(true)
@@ -45,11 +47,13 @@ export default function UrgenciasPage() {
     Promise.all([
       solicitarAutenticado('/tecnicos/especialidades/'),
       solicitarAutenticado('/tecnicos/zonas/'),
+      solicitarAutenticado('/urgencias/tarifa/'),
     ])
-      .then(([e, z]) => {
+      .then(([e, z, condiciones]) => {
         if (activo) {
           setEspecialidades(extraerLista(e))
           setZonas(extraerLista(z))
+          setTarifa(condiciones.tarifa_visita)
         }
       })
       .catch((e) => {
@@ -66,7 +70,7 @@ export default function UrgenciasPage() {
   const campo = (event) => setDatos({ ...datos, [event.target.name]: event.target.value })
   async function pedir(event) {
     event.preventDefault()
-    if (enviando) return
+    if (enviando || tarifa === null) return
     setEnviando(true)
     setError('')
     try {
@@ -103,11 +107,11 @@ export default function UrgenciasPage() {
       </Link>
       {!pedidoId && !pendiente && (
         <section className="mt-card space-y-3">
-          <h2 className="text-xl font-bold">Visita urgente · $40.000</h2>
+          <h2 className="text-xl font-bold">Visita urgente · {formatearDinero(tarifa)}</h2>
           <p>Asignación automática a un técnico aprobado, disponible y de tu zona.</p>
           <p className="text-sm text-slate-600">
-            La visita cuesta $40.000. Reparaciones y materiales adicionales se acuerdan aparte con
-            el técnico. El pago se realiza fuera de MiTécnico.
+            La visita cuesta {formatearDinero(tarifa)}. Reparaciones y materiales adicionales se
+            acuerdan aparte con el técnico. El pago se realiza fuera de MiTécnico.
           </p>
         </section>
       )}
@@ -182,9 +186,13 @@ export default function UrgenciasPage() {
           </p>
           <button
             className="mt-button"
-            disabled={enviando || !especialidades.length || !zonas.length}
+            disabled={enviando || tarifa === null || !especialidades.length || !zonas.length}
           >
-            {enviando ? 'Buscando…' : 'Confirmar visita de $40.000'}
+            {enviando
+              ? 'Buscando…'
+              : tarifa === null
+                ? 'Cargando tarifa…'
+                : `Confirmar visita de ${formatearDinero(tarifa)}`}
           </button>
         </form>
       )}
@@ -202,6 +210,9 @@ export default function UrgenciasPage() {
             </span>
           </div>
           <p>{p.descripcion}</p>
+          <p className="text-sm">
+            Visita: {formatearDinero(p.tarifa_visita)} · Adicionales a acordar
+          </p>
           <p className="text-sm text-slate-600">{p.direccion}</p>
           {p.estado === 'buscando' && (
             <p role="status">

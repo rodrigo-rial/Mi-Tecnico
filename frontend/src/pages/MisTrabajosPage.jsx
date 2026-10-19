@@ -1,3 +1,4 @@
+import { formatearDinero } from '../utils/formato'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -173,7 +174,9 @@ function MisTrabajosPage() {
                     </div>
                     <p className="text-sm text-slate-600">{trabajo.zona_nombre}</p>
                     <p>{trabajo.descripcion}</p>
-                    <p className="text-sm">Visita: $40.000 · Adicionales a acordar</p>
+                    <p className="text-sm">
+                      Visita: {formatearDinero(trabajo.tarifa_visita)} · Adicionales a acordar
+                    </p>
                     <Link
                       className="text-brand font-semibold"
                       to={`/cliente/urgencias?id=${trabajo.urgenciaId}`}
