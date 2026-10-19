@@ -62,12 +62,18 @@ function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
-      <section className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-        <header className="mb-8 text-center">
+    <main className="grid min-h-svh grid-rows-[minmax(144px,1fr)_auto_minmax(32px,1fr)] justify-items-center bg-slate-100 px-4">
+      <div className="flex items-center justify-center gap-3 py-6 text-4xl font-bold tracking-tight text-ink sm:text-5xl">
+        <img
+          src="/mitecnico-logo.png"
+          alt=""
+          className="h-20 w-20 object-contain sm:h-24 sm:w-24"
+        />
+        <span>MiTécnico</span>
+      </div>
+      <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <header className="mb-7 text-center">
           <h1 className="text-3xl font-bold text-blue-700">Iniciar sesión</h1>
-
-          <p className="mt-2 text-slate-600">Ingresá a tu cuenta de MiTécnico.</p>
         </header>
 
         <form className="grid gap-5" onSubmit={manejarEnvio}>
@@ -156,9 +162,9 @@ function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-slate-600">
-          ¿Todavía no tenés una cuenta?{' '}
+          ¿No tenés cuenta?{' '}
           <Link to="/registro" className="font-semibold text-blue-700 hover:underline">
-            Registrarse
+            Registrate
           </Link>
         </p>
       </section>
