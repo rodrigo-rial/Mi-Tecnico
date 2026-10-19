@@ -688,7 +688,7 @@
 .urgency-floating-button {
   position: fixed;
   z-index: 30;
-  left: max(16px, env(safe-area-inset-left));
+  right: max(16px, env(safe-area-inset-right));
   bottom: calc(16px + env(safe-area-inset-bottom));
   display: inline-flex;
   align-items: center;

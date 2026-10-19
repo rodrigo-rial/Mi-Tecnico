@@ -30,6 +30,7 @@ function SolicitudesClientePage() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [intento, setIntento] = useState(0)
+  const [mostrarFiltros, setMostrarFiltros] = useState(false)
   const [filtro, setFiltro] = useState('')
   const [busqueda, setBusqueda] = useState('')
   const [aviso] = useState(location.state?.mensaje ?? '')
@@ -88,6 +89,14 @@ function SolicitudesClientePage() {
     }
   }, [intento, navigate])
 
+  function alternarFiltros() {
+    if (mostrarFiltros) {
+      setFiltro('')
+      setBusqueda('')
+    }
+    setMostrarFiltros(!mostrarFiltros)
+  }
+
   function reintentar() {
     setCargando(true)
     setError('')
@@ -130,7 +139,10 @@ function SolicitudesClientePage() {
               key={valor}
               type="button"
               aria-pressed={filtro === valor}
-              onClick={() => setFiltro(valor)}
+              onClick={() => {
+                setMostrarFiltros(true)
+                setFiltro(valor)
+              }}
               className={filtro === valor ? 'summary-active' : ''}
             >
               <strong>
@@ -143,7 +155,40 @@ function SolicitudesClientePage() {
         </div>
       )}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-bold">Solicitudes</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold">Solicitudes</h2>
+          {!cargando && !error && solicitudes.length > 0 && (
+            <button
+              type="button"
+              onClick={alternarFiltros}
+              aria-expanded={mostrarFiltros}
+              aria-controls="filtros-solicitudes"
+              aria-label={
+                mostrarFiltros
+                  ? 'Cerrar filtros y mostrar todas las solicitudes'
+                  : 'Mostrar filtros de solicitudes'
+              }
+              title={mostrarFiltros ? 'Cerrar filtros' : 'Filtros'}
+              className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${mostrarFiltros ? 'border-brand bg-brand text-white' : 'border-line bg-surface text-ink hover:bg-canvas'}`}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M4 7h9m4 0h3M4 17h3m4 0h9" />
+                <circle cx="15" cy="7" r="2" />
+                <circle cx="9" cy="17" r="2" />
+              </svg>
+            </button>
+          )}
+        </div>
         <Link className="text-brand text-sm font-semibold" to="/trabajos">
           Ver servicios contratados →
         </Link>
@@ -177,33 +222,40 @@ function SolicitudesClientePage() {
 
       {!cargando && !error && solicitudes.length > 0 && (
         <>
-          <label className="block text-sm font-medium">
-            Buscar en mis solicitudes
-            <input
-              type="search"
-              className="mt-input"
-              placeholder="Por título, servicio o zona"
-              value={busqueda}
-              onChange={(event) => setBusqueda(event.target.value)}
-            />
-          </label>
-          <div role="group" aria-label="Filtrar por estado" className="flex flex-wrap gap-2">
-            {FILTROS.map(({ valor, texto }) => (
-              <button
-                key={texto}
-                type="button"
-                aria-pressed={filtro === valor}
-                onClick={() => setFiltro(valor)}
-                className={`min-h-11 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                  filtro === valor
-                    ? 'border-brand bg-brand text-white'
-                    : 'border-line bg-surface text-ink hover:bg-canvas'
-                }`}
-              >
-                {texto}
-              </button>
-            ))}
-          </div>
+          {mostrarFiltros && (
+            <div
+              id="filtros-solicitudes"
+              className="space-y-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:p-5"
+            >
+              <label className="block text-sm font-medium">
+                Buscar en mis solicitudes
+                <input
+                  type="search"
+                  className="mt-input"
+                  placeholder="Por título, servicio o zona"
+                  value={busqueda}
+                  onChange={(event) => setBusqueda(event.target.value)}
+                />
+              </label>
+              <div role="group" aria-label="Filtrar por estado" className="flex flex-wrap gap-2">
+                {FILTROS.map(({ valor, texto }) => (
+                  <button
+                    key={texto}
+                    type="button"
+                    aria-pressed={filtro === valor}
+                    onClick={() => setFiltro(valor)}
+                    className={`min-h-11 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                      filtro === valor
+                        ? 'border-brand bg-brand text-white'
+                        : 'border-line bg-surface text-ink hover:bg-canvas'
+                    }`}
+                  >
+                    {texto}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {visibles.length === 0 ? (
             <EstadoVacio
