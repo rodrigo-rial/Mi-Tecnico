@@ -1,5 +1,4 @@
 import PanelTecnico from './PanelTecnico'
-import { obtenerAccessToken } from '../services/authApi'
 import FotoPerfil from '../components/cuenta/FotoPerfil'
 import { useState } from 'react'
 import EditarCuenta from '../components/cuenta/EditarCuenta'
@@ -34,7 +33,7 @@ export default function CuentaPage() {
           </dl></>}</section>
           <aside className="space-y-4">{usuario.rol !== 'ADMINISTRADOR' && <section className="mt-card space-y-3"><h2 className="text-lg font-bold">Mi reputación</h2><ResumenReputacion usuarioId={usuario.id} /></section>}<section className="mt-card"><h2 className="font-bold text-lg">{tecnico ? 'Tu espacio profesional' : 'Todo a mano'}</h2><p className="text-sm text-slate-500 mt-2">{tecnico ? 'Gestioná tu presentación, servicios y zonas de cobertura.' : 'Consultá tus pedidos y seguí los servicios que ya coordinaste.'}</p>{usuario.rol !== 'ADMINISTRADOR' && (tecnico ? <a className="quick-link" href="#perfil-profesional">Datos profesionales <span aria-hidden="true">↓</span></a> : <Link className="quick-link" to="/cliente/solicitudes">Ver mis solicitudes <span aria-hidden="true">→</span></Link>)}{usuario.rol !== 'ADMINISTRADOR' && <Link className="quick-link" to="/trabajos">{tecnico ? 'Mis trabajos' : 'Servicios contratados'} <span aria-hidden="true">→</span></Link>}</section></aside>
         </div>
-        {tecnico && <section id="perfil-profesional"><PanelTecnico token={obtenerAccessToken()} integrado /></section>}
+        {tecnico && <section id="perfil-profesional"><PanelTecnico integrado /></section>}
       </>}
     </LayoutPagina>
   )

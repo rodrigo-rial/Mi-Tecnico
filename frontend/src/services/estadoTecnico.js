@@ -1,5 +1,3 @@
-import { obtenerAccessToken } from './authApi'
-import { conSesionRenovada } from './sesion'
 import { obtenerPerfilTecnico } from './tecnicosApi'
 
 /**
@@ -8,9 +6,7 @@ import { obtenerPerfilTecnico } from './tecnicosApi'
  */
 export async function obtenerEstadoValidacion() {
   try {
-    const perfil = await conSesionRenovada(() =>
-      obtenerPerfilTecnico(obtenerAccessToken()),
-    )
+    const perfil = await obtenerPerfilTecnico()
     return perfil.estado_validacion ?? null
   } catch (error) {
     if (error.status === 404) return null

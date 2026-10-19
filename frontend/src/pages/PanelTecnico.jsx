@@ -29,15 +29,15 @@ const etiquetasEstado = {
   RECHAZADO: 'Documentación rechazada',
 }
 
-async function solicitarDatosPanel(token) {
+async function solicitarDatosPanel() {
   const [especialidades, zonas] = await Promise.all([
-    obtenerEspecialidades(token),
-    obtenerZonas(token),
+    obtenerEspecialidades(),
+    obtenerZonas(),
   ])
 
   let perfil
   try {
-    perfil = await obtenerPerfilTecnico(token)
+    perfil = await obtenerPerfilTecnico()
   } catch (solicitudError) {
     if (solicitudError.status === 404) {
       return {
@@ -49,11 +49,11 @@ async function solicitarDatosPanel(token) {
     }
     throw solicitudError
   }
-  const documentacion = await obtenerDocumentacionTecnico(token)
+  const documentacion = await obtenerDocumentacionTecnico()
   return { especialidades, zonas, perfil, documentacion }
 }
 
-export default function PanelTecnico({ token, integrado = false }) {
+export default function PanelTecnico({ integrado = false }) {
   const { usuario } = useUsuarioActual()
   const [editando, setEditando] = useState(false)
   const [perfil, setPerfil] = useState(null)
@@ -64,10 +64,8 @@ export default function PanelTecnico({ token, integrado = false }) {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!token) return undefined
-
     let pantallaActiva = true
-    solicitarDatosPanel(token)
+    solicitarDatosPanel()
       .then((datos) => {
         if (!pantallaActiva) return
         setEspecialidades(datos.especialidades)
@@ -86,13 +84,13 @@ export default function PanelTecnico({ token, integrado = false }) {
     return () => {
       pantallaActiva = false
     }
-  }, [token])
+  }, [])
 
   async function reintentarCarga() {
     setCargando(true)
     setError('')
     try {
-      const datos = await solicitarDatosPanel(token)
+      const datos = await solicitarDatosPanel()
       setEspecialidades(datos.especialidades)
       setZonas(datos.zonas)
       setPerfil(datos.perfil)
@@ -106,40 +104,24 @@ export default function PanelTecnico({ token, integrado = false }) {
 
   async function guardarPerfil(datos) {
     const perfilGuardado = perfil
-      ? await actualizarPerfilTecnico(token, datos)
-      : await crearPerfilTecnico(token, datos)
+      ? await actualizarPerfilTecnico(datos)
+      : await crearPerfilTecnico(datos)
     setPerfil(perfilGuardado)
 
     if (!documentacion) {
-      const documentacionCargada = await obtenerDocumentacionTecnico(token)
+      const documentacionCargada = await obtenerDocumentacionTecnico()
       setDocumentacion(documentacionCargada)
     }
   }
 
   async function guardarDocumentacion(formulario) {
-    const documentacionGuardada = await actualizarDocumentacionTecnico(
-      token,
-      formulario,
-    )
+    const documentacionGuardada = await actualizarDocumentacionTecnico(formulario)
     setDocumentacion(documentacionGuardada)
     setPerfil((perfilActual) => ({
       ...perfilActual,
       estado_validacion: documentacionGuardada.estado_validacion,
     }))
     return documentacionGuardada
-  }
-
-  if (!token) {
-    return (
-      <main className="min-h-screen bg-canvas px-4 py-12">
-        <section className="mx-auto max-w-xl mt-card text-center">
-          <h1 className="text-3xl font-bold text-brand">Panel del técnico</h1>
-          <p className="mt-4 text-ink">
-            Iniciá sesión con una cuenta de técnico para administrar tu perfil.
-          </p>
-        </section>
-      </main>
-    )
   }
 
   const estado = perfil?.estado_validacion
