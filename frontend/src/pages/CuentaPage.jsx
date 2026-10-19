@@ -1,7 +1,7 @@
 import PanelTecnico from './PanelTecnico'
 import FotoPerfil from '../components/cuenta/FotoPerfil'
 import { useState } from 'react'
-import EditarCuenta from '../components/cuenta/EditarCuenta'
+import DatosCuenta from '../components/cuenta/DatosCuenta'
 import ResumenReputacion from '../components/reputacion/ResumenReputacion'
 import { Link } from 'react-router-dom'
 import LayoutPagina from '../components/comunes/LayoutPagina'
@@ -10,8 +10,6 @@ import { enlacesPorRol } from '../utils/navegacion'
 
 export default function CuentaPage() {
   const { usuario, cargando, actualizarUsuario } = useUsuarioActual()
-  const [editando, setEditando] = useState(false)
-  const [aviso, setAviso] = useState('')
   const [avisoFoto, setAvisoFoto] = useState(null)
   const tecnico = usuario?.rol === 'TECNICO'
   const nombre =
@@ -59,70 +57,7 @@ export default function CuentaPage() {
             </p>
           )}
           <div className="profile-columns">
-            <section className="mt-card">
-              <p className="eyebrow">INFORMACIÓN PERSONAL</p>
-              <h2 className="text-xl font-bold mt-2">Los datos de tu cuenta</h2>
-              {aviso && (
-                <p role="status" className="text-emerald-700 mt-3">
-                  {aviso}
-                </p>
-              )}
-              {editando ? (
-                <EditarCuenta
-                  usuario={usuario}
-                  onCancelar={() => setEditando(false)}
-                  onGuardado={(cuenta) => {
-                    actualizarUsuario(cuenta)
-                    setEditando(false)
-                    setAviso('Datos guardados correctamente.')
-                  }}
-                />
-              ) : (
-                <>
-                  <button
-                    className="secondary-button mt-4"
-                    type="button"
-                    onClick={() => {
-                      setAviso('')
-                      setEditando(true)
-                    }}
-                  >
-                    Editar datos
-                  </button>
-                  <dl className="account-fields">
-                    <div>
-                      <dt>Nombre completo</dt>
-                      <dd>
-                        {[usuario.first_name, usuario.last_name].filter(Boolean).join(' ') ||
-                          'No informado'}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Nombre de usuario</dt>
-                      <dd>@{usuario.username}</dd>
-                    </div>
-                    <div>
-                      <dt>Correo electrónico</dt>
-                      <dd>{usuario.email || 'No informado'}</dd>
-                    </div>
-                    <div>
-                      <dt>Tipo de cuenta</dt>
-                      <dd>{rol}</dd>
-                    </div>
-                    <div>
-                      <dt>Teléfono</dt>
-                      <dd>{usuario.telefono || 'No informado'}</dd>
-                    </div>
-                    <div>
-                      <dt>Domicilio de referencia</dt>
-                      <dd className="break-words">
-                        {usuario.domicilio_referencia || 'No informado'}
-                      </dd>
-                    </div>
-                  </dl>
-                </>
-              )}
-            </section>
+            <DatosCuenta usuario={usuario} rol={rol} onCambio={actualizarUsuario} />
             <aside className="space-y-4">
               {usuario.rol !== 'ADMINISTRADOR' && (
                 <section className="mt-card space-y-3">

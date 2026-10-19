@@ -2,7 +2,7 @@ import Avatar from '../components/comunes/Avatar'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import LayoutPagina from '../components/comunes/LayoutPagina'
-import Estrellas from '../components/reputacion/Estrellas'
+import ResenasProfesional from '../components/reputacion/ResenasProfesional'
 import { solicitarAutenticado } from '../services/http'
 import { enlacesPorRol } from '../utils/navegacion'
 
@@ -71,34 +71,7 @@ function Perfil({ id }) {
           ))}
         </div>
       </section>
-      <section className="mt-card space-y-4">
-        <h2 className="text-xl font-bold">Calificaciones y reseñas</h2>
-        {datos.reputacion.cantidad ? (
-          <div className="flex flex-wrap gap-2">
-            <Estrellas valor={datos.reputacion.promedio} />
-            <span>
-              {Number(datos.reputacion.promedio).toLocaleString('es-AR', {
-                maximumFractionDigits: 1,
-              })}{' '}
-              / 5 · {datos.reputacion.cantidad}{' '}
-              {datos.reputacion.cantidad === 1 ? 'calificación' : 'calificaciones'}
-            </span>
-          </div>
-        ) : (
-          <p>Sin calificaciones todavía.</p>
-        )}
-        {datos.resenas.map((resena) => (
-          <article key={resena.id} className="border-t border-line pt-4">
-            <Estrellas valor={resena.puntaje} />
-            <p className="mt-2 whitespace-pre-line break-words">
-              {resena.comentario || 'Sin comentario.'}
-            </p>
-            <time className="text-sm text-slate-500" dateTime={resena.created_at}>
-              {new Date(resena.created_at).toLocaleDateString('es-AR')}
-            </time>
-          </article>
-        ))}
-      </section>
+      <ResenasProfesional reputacion={datos.reputacion} resenas={datos.resenas} />
       <section className="mt-card space-y-4">
         <h2 className="text-xl font-bold">Trabajos terminados</h2>
         {!datos.fotos.length && <p>Todavía no hay fotos.</p>}
