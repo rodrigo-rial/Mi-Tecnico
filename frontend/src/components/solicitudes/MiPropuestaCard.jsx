@@ -1,11 +1,7 @@
 import { Link } from 'react-router-dom'
 
 import Badge from '../comunes/Badge'
-import {
-  formatearDinero,
-  formatearFecha,
-  formatearFechaHora,
-} from '../../utils/formato'
+import { formatearDinero, formatearFecha, formatearFechaHora } from '../../utils/formato'
 import { rutaTrabajo } from '../../utils/navegacion'
 
 // Aviso cuando la propuesta sigue pendiente pero la solicitud ya no está abierta.
@@ -31,7 +27,9 @@ function MiPropuestaCard({ propuesta, trabajo }) {
       : ''
 
   return (
-    <article className={`mt-card ${propuesta.estado === 'aceptada' ? 'ring-2 ring-emerald-500' : ''}`}>
+    <article
+      className={`mt-card ${propuesta.estado === 'aceptada' ? 'ring-2 ring-emerald-500' : ''}`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="text-lg font-semibold text-ink">{titulo}</h2>
@@ -46,9 +44,7 @@ function MiPropuestaCard({ propuesta, trabajo }) {
         </div>
       </div>
 
-      <p className="mt-4 text-2xl font-bold text-brand-dark">
-        {formatearDinero(propuesta.precio)}
-      </p>
+      <p className="mt-4 text-2xl font-bold text-brand-dark">{formatearDinero(propuesta.precio)}</p>
       <p className="text-xs text-slate-500">Precio estimado</p>
 
       <p className="mt-3 whitespace-pre-line text-ink">{propuesta.descripcion_solucion}</p>
@@ -72,9 +68,7 @@ function MiPropuestaCard({ propuesta, trabajo }) {
         )}
       </dl>
 
-      {aviso && (
-        <p className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">{aviso}</p>
-      )}
+      {aviso && <p className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">{aviso}</p>}
 
       {propuesta.estado === 'aceptada' && trabajo && (
         <p className="mt-4">

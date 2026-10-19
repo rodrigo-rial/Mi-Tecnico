@@ -6,8 +6,10 @@ import {
   renovarToken,
 } from './authApi'
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api')
-  .replace(/\/$/, '')
+const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api').replace(
+  /\/$/,
+  '',
+)
 
 function extraerMensajeError(datos, estado) {
   if (typeof datos?.detail === 'string') return datos.detail
@@ -48,9 +50,12 @@ async function enviar(ruta, { method, datos, token, archivo }) {
   })
 
   const tipoContenido = respuesta.headers.get('content-type') ?? ''
-  const contenido = archivo && respuesta.ok ? await respuesta.blob() : tipoContenido.includes('application/json')
-    ? await respuesta.json()
-    : null
+  const contenido =
+    archivo && respuesta.ok
+      ? await respuesta.blob()
+      : tipoContenido.includes('application/json')
+        ? await respuesta.json()
+        : null
 
   return { respuesta, contenido }
 }

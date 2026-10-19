@@ -96,11 +96,7 @@ function SolicitudForm({ especialidades, zonas, onGuardar }) {
   }
 
   function propsCampo(nombre, ayuda) {
-    const describedBy = errores[nombre]
-      ? `${nombre}-error`
-      : ayuda
-        ? `${nombre}-ayuda`
-        : undefined
+    const describedBy = errores[nombre] ? `${nombre}-error` : ayuda ? `${nombre}-ayuda` : undefined
 
     return {
       id: nombre,
@@ -130,11 +126,7 @@ function SolicitudForm({ especialidades, zonas, onGuardar }) {
         error={errores.descripcion}
         ayuda="Mientras más detalles, mejor propuesta vas a recibir."
       >
-        <textarea
-          rows={5}
-          className="mt-input"
-          {...propsCampo('descripcion', true)}
-        />
+        <textarea rows={5} className="mt-input" {...propsCampo('descripcion', true)} />
       </Campo>
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -176,12 +168,7 @@ function SolicitudForm({ especialidades, zonas, onGuardar }) {
         etiqueta="Fecha preferida (opcional)"
         error={errores.fecha_preferida}
       >
-        <input
-          type="date"
-          min={hoyISO()}
-          className="mt-input"
-          {...propsCampo('fecha_preferida')}
-        />
+        <input type="date" min={hoyISO()} className="mt-input" {...propsCampo('fecha_preferida')} />
       </Campo>
 
       <div>
@@ -194,27 +181,55 @@ function SolicitudForm({ especialidades, zonas, onGuardar }) {
           />
           Es urgente
         </label>
-        <p className="text-sm text-slate-600">
-          Marcala si necesitás atención lo antes posible.
-        </p>
+        <p className="text-sm text-slate-600">Marcala si necesitás atención lo antes posible.</p>
         {errores.es_urgente && (
           <p className="mt-1 text-sm font-medium text-red-700">{errores.es_urgente}</p>
         )}
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="imagenes" className="block font-semibold">Fotos del problema (opcional)</label>
-        <input id="imagenes" type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={enviando}
+        <label htmlFor="imagenes" className="block font-semibold">
+          Fotos del problema (opcional)
+        </label>
+        <input
+          id="imagenes"
+          type="file"
+          multiple
+          accept="image/jpeg,image/png,image/webp"
+          disabled={enviando}
           className="block w-full rounded-lg border border-line p-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:p-3 file:font-semibold file:text-blue-700"
           onChange={(evento) => {
             const fotos = Array.from(evento.target.files)
-            const fallo = fotos.length > 5 ? 'Podés adjuntar hasta 5 fotos.' : fotos.some((foto) => foto.size > 5 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(foto.type)) ? 'Usá JPG, PNG o WEBP de hasta 5 MB cada una.' : ''
+            const fallo =
+              fotos.length > 5
+                ? 'Podés adjuntar hasta 5 fotos.'
+                : fotos.some(
+                      (foto) =>
+                        foto.size > 5 * 1024 * 1024 ||
+                        !['image/jpeg', 'image/png', 'image/webp'].includes(foto.type),
+                    )
+                  ? 'Usá JPG, PNG o WEBP de hasta 5 MB cada una.'
+                  : ''
             setErrorFotos(fallo)
             setImagenes(fallo ? [] : fotos)
-          }} aria-describedby="imagenes-ayuda" />
-        <p id="imagenes-ayuda" className="text-sm text-slate-500">Hasta 5 fotos JPG, PNG o WEBP, de 5 MB cada una.</p>
-        {imagenes.length > 0 && <ul className="text-sm text-slate-600">{imagenes.map((foto, indice) => <li key={indice}>{foto.name}</li>)}</ul>}
-        {errorFotos && <p role="alert" className="text-sm text-red-700">{errorFotos}</p>}
+          }}
+          aria-describedby="imagenes-ayuda"
+        />
+        <p id="imagenes-ayuda" className="text-sm text-slate-500">
+          Hasta 5 fotos JPG, PNG o WEBP, de 5 MB cada una.
+        </p>
+        {imagenes.length > 0 && (
+          <ul className="text-sm text-slate-600">
+            {imagenes.map((foto, indice) => (
+              <li key={indice}>{foto.name}</li>
+            ))}
+          </ul>
+        )}
+        {errorFotos && (
+          <p role="alert" className="text-sm text-red-700">
+            {errorFotos}
+          </p>
+        )}
       </div>
       <MensajeError mensaje={errores.general} />
 

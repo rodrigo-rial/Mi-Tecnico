@@ -73,24 +73,14 @@ function RegistroPage() {
     <main className="min-h-screen bg-slate-100 px-4 py-10">
       <section className="mx-auto max-w-2xl rounded-2xl bg-white p-8 shadow-lg">
         <header className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-blue-700">
-            Crear una cuenta
-          </h1>
+          <h1 className="text-3xl font-bold text-blue-700">Crear una cuenta</h1>
 
-          <p className="mt-2 text-slate-600">
-            Registrate en MiTécnico como cliente o técnico.
-          </p>
+          <p className="mt-2 text-slate-600">Registrate en MiTécnico como cliente o técnico.</p>
         </header>
 
-        <form
-          className="grid gap-5 md:grid-cols-2"
-          onSubmit={manejarEnvio}
-        >
+        <form className="grid gap-5 md:grid-cols-2" onSubmit={manejarEnvio}>
           <div>
-            <label
-              className="mb-1 block font-medium text-slate-700"
-              htmlFor="first_name"
-            >
+            <label className="mb-1 block font-medium text-slate-700" htmlFor="first_name">
               Nombre
             </label>
 
@@ -107,10 +97,7 @@ function RegistroPage() {
           </div>
 
           <div>
-            <label
-              className="mb-1 block font-medium text-slate-700"
-              htmlFor="last_name"
-            >
+            <label className="mb-1 block font-medium text-slate-700" htmlFor="last_name">
               Apellido
             </label>
 
@@ -127,10 +114,7 @@ function RegistroPage() {
           </div>
 
           <div>
-            <label
-              className="mb-1 block font-medium text-slate-700"
-              htmlFor="username"
-            >
+            <label className="mb-1 block font-medium text-slate-700" htmlFor="username">
               Nombre de usuario
             </label>
 
@@ -147,10 +131,7 @@ function RegistroPage() {
           </div>
 
           <div>
-            <label
-              className="mb-1 block font-medium text-slate-700"
-              htmlFor="email"
-            >
+            <label className="mb-1 block font-medium text-slate-700" htmlFor="email">
               Correo electrónico
             </label>
 
@@ -167,10 +148,7 @@ function RegistroPage() {
           </div>
 
           <div>
-            <label
-              className="mb-1 block font-medium text-slate-700"
-              htmlFor="password"
-            >
+            <label className="mb-1 block font-medium text-slate-700" htmlFor="password">
               Contraseña
             </label>
 
@@ -190,12 +168,8 @@ function RegistroPage() {
               <button
                 type="button"
                 onClick={() => setMostrarPassword((visible) => !visible)}
-                aria-label={
-                  mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
-                }
-                title={
-                  mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
-                }
+                aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                title={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-slate-500 hover:text-blue-700"
               >
                 <svg
@@ -219,10 +193,7 @@ function RegistroPage() {
           </div>
 
           <div>
-            <label
-              className="mb-1 block font-medium text-slate-700"
-              htmlFor="confirmarPassword"
-            >
+            <label className="mb-1 block font-medium text-slate-700" htmlFor="confirmarPassword">
               Confirmar contraseña
             </label>
 
@@ -240,10 +211,7 @@ function RegistroPage() {
           </div>
 
           <div className="md:col-span-2">
-            <label
-              className="mb-1 block font-medium text-slate-700"
-              htmlFor="rol"
-            >
+            <label className="mb-1 block font-medium text-slate-700" htmlFor="rol">
               Tipo de cuenta
             </label>
 
@@ -259,16 +227,10 @@ function RegistroPage() {
             </select>
           </div>
 
-          {error && (
-            <p className="rounded-lg bg-red-100 p-3 text-red-700 md:col-span-2">
-              {error}
-            </p>
-          )}
+          {error && <p className="rounded-lg bg-red-100 p-3 text-red-700 md:col-span-2">{error}</p>}
 
           {mensaje && (
-            <p className="rounded-lg bg-green-100 p-3 text-green-700 md:col-span-2">
-              {mensaje}
-            </p>
+            <p className="rounded-lg bg-green-100 p-3 text-green-700 md:col-span-2">{mensaje}</p>
           )}
 
           <button
@@ -282,10 +244,7 @@ function RegistroPage() {
 
         <p className="mt-6 text-center text-slate-600">
           ¿Ya tenés una cuenta?{' '}
-          <Link
-            to="/login"
-            className="font-semibold text-blue-700 hover:underline"
-          >
+          <Link to="/login" className="font-semibold text-blue-700 hover:underline">
             Iniciar sesión
           </Link>
         </p>

@@ -1,55 +1,55 @@
-import { useState } from "react";
-import { subirFotoDeTrabajo } from "../../services/reputacionService";
+import { useState } from 'react'
+import { subirFotoDeTrabajo } from '../../services/reputacionService'
 
 // Estos límites son solo para avisar rápido; el backend es quien manda.
-const MAX_MB = 5;
-const TIPOS = ["image/jpeg", "image/png", "image/webp"];
+const MAX_MB = 5
+const TIPOS = ['image/jpeg', 'image/png', 'image/webp']
 
 export default function SubirFotosTrabajo({ trabajoId, cantidadActual, maximo = 5, onSubida }) {
-  const [archivo, setArchivo] = useState(null);
-  const [descripcion, setDescripcion] = useState("");
-  const [enviando, setEnviando] = useState(false);
-  const [error, setError] = useState("");
-  const [exito, setExito] = useState("");
+  const [archivo, setArchivo] = useState(null)
+  const [descripcion, setDescripcion] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const [error, setError] = useState('')
+  const [exito, setExito] = useState('')
 
   if (cantidadActual >= maximo) {
-    return <p className="text-sm text-[#364152]">Alcanzaste el máximo de {maximo} fotos.</p>;
+    return <p className="text-sm text-[#364152]">Alcanzaste el máximo de {maximo} fotos.</p>
   }
 
   function elegirArchivo(evento) {
-    setError("");
-    setExito("");
-    const elegido = evento.target.files[0];
-    if (!elegido) return setArchivo(null);
+    setError('')
+    setExito('')
+    const elegido = evento.target.files[0]
+    if (!elegido) return setArchivo(null)
     if (!TIPOS.includes(elegido.type)) {
-      setArchivo(null);
-      return setError("Elegí una imagen JPG, PNG o WEBP.");
+      setArchivo(null)
+      return setError('Elegí una imagen JPG, PNG o WEBP.')
     }
     if (elegido.size > MAX_MB * 1024 * 1024) {
-      setArchivo(null);
-      return setError(`La foto no puede pesar más de ${MAX_MB} MB.`);
+      setArchivo(null)
+      return setError(`La foto no puede pesar más de ${MAX_MB} MB.`)
     }
-    setArchivo(elegido);
+    setArchivo(elegido)
   }
 
   async function enviar(evento) {
-    evento.preventDefault();
-    if (!archivo) return setError("Elegí una foto primero.");
-    const formulario = evento.currentTarget;
-    setExito("");
-    setEnviando(true);
-    setError("");
+    evento.preventDefault()
+    if (!archivo) return setError('Elegí una foto primero.')
+    const formulario = evento.currentTarget
+    setExito('')
+    setEnviando(true)
+    setError('')
     try {
-      await subirFotoDeTrabajo(trabajoId, archivo, descripcion);
-      setExito("Foto subida correctamente.");
-      setArchivo(null);
-      setDescripcion("");
-      formulario.reset();
-      onSubida();
+      await subirFotoDeTrabajo(trabajoId, archivo, descripcion)
+      setExito('Foto subida correctamente.')
+      setArchivo(null)
+      setDescripcion('')
+      formulario.reset()
+      onSubida()
     } catch (e) {
-      setError(e.message);
+      setError(e.message)
     } finally {
-      setEnviando(false);
+      setEnviando(false)
     }
   }
 
@@ -62,7 +62,7 @@ export default function SubirFotosTrabajo({ trabajoId, cantidadActual, maximo = 
         <input
           id="foto"
           type="file"
-          accept={TIPOS.join(",")}
+          accept={TIPOS.join(',')}
           onChange={elegirArchivo}
           disabled={enviando}
           aria-describedby="ayuda-foto"
@@ -70,8 +70,10 @@ export default function SubirFotosTrabajo({ trabajoId, cantidadActual, maximo = 
         />
       </div>
       <p id="ayuda-foto" className="text-sm text-slate-500">
-        {archivo ? `Lista para subir: ${archivo.name}` : 'Primero tocá “Seleccionar archivo” y elegí una foto.'}
-        {' '}JPG, PNG o WEBP, hasta 5 MB.
+        {archivo
+          ? `Lista para subir: ${archivo.name}`
+          : 'Primero tocá “Seleccionar archivo” y elegí una foto.'}{' '}
+        JPG, PNG o WEBP, hasta 5 MB.
       </p>
       <div>
         <label htmlFor="descripcion-foto" className="block text-sm font-medium text-[#364152]">
@@ -88,16 +90,24 @@ export default function SubirFotosTrabajo({ trabajoId, cantidadActual, maximo = 
         />
       </div>
 
-      {error && <p role="alert" className="text-sm font-medium text-[#ef4444]">{error}</p>}
-      {exito && <p role="status" className="text-sm font-medium text-[#10b981]">{exito}</p>}
+      {error && (
+        <p role="alert" className="text-sm font-medium text-[#ef4444]">
+          {error}
+        </p>
+      )}
+      {exito && (
+        <p role="status" className="text-sm font-medium text-[#10b981]">
+          {exito}
+        </p>
+      )}
 
       <button
         type="submit"
         disabled={enviando || !archivo}
         className="rounded-lg bg-[#1a73e8] px-4 py-2 font-medium text-white hover:bg-[#1447e6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447e6] disabled:opacity-60"
       >
-        {enviando ? "Subiendo…" : "Subir foto"}
+        {enviando ? 'Subiendo…' : 'Subir foto'}
       </button>
     </form>
-  );
+  )
 }

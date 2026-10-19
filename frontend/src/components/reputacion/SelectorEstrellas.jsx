@@ -17,17 +17,17 @@ export default function SelectorEstrellas({ valor, onChange, deshabilitado = fal
             <span
               aria-hidden="true"
               className={`text-3xl peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-[#1447e6] ${
-                n <= valor ? "text-[#f59e0b]" : "text-gray-300"
+                n <= valor ? 'text-[#f59e0b]' : 'text-gray-300'
               }`}
             >
               ★
             </span>
             <span className="sr-only">
-              {n} {n === 1 ? "estrella" : "estrellas"}
+              {n} {n === 1 ? 'estrella' : 'estrellas'}
             </span>
           </label>
         ))}
       </div>
     </fieldset>
-  );
+  )
 }

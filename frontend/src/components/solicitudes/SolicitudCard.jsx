@@ -11,12 +11,7 @@ import { rutaDetalleSolicitud } from '../../utils/navegacion'
  *   defecto solo en el modo resumen. El técnico lo desactiva.
  * children: acciones u otro contenido al pie de la tarjeta.
  */
-function SolicitudCard({
-  solicitud,
-  completa = false,
-  conEnlace = !completa,
-  children,
-}) {
+function SolicitudCard({ solicitud, completa = false, conEnlace = !completa, children }) {
   return (
     <article className="mt-card request-card">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -38,7 +33,11 @@ function SolicitudCard({
         </div>
       </div>
 
-      {solicitud.destinatario_nombre && <p className="mt-2 text-sm font-semibold text-brand">Dirigida a {solicitud.destinatario_nombre}</p>}
+      {solicitud.destinatario_nombre && (
+        <p className="mt-2 text-sm font-semibold text-brand">
+          Dirigida a {solicitud.destinatario_nombre}
+        </p>
+      )}
       <p className="mt-1 text-sm text-slate-600">
         {solicitud.especialidad_nombre} · {solicitud.zona_nombre}
       </p>
@@ -54,15 +53,11 @@ function SolicitudCard({
         </div>
         <div>
           <dt className="text-slate-500">Fecha preferida</dt>
-          <dd className="font-medium text-ink">
-            {formatearFecha(solicitud.fecha_preferida)}
-          </dd>
+          <dd className="font-medium text-ink">{formatearFecha(solicitud.fecha_preferida)}</dd>
         </div>
         <div>
           <dt className="text-slate-500">Publicada</dt>
-          <dd className="font-medium text-ink">
-            {formatearFechaHora(solicitud.created_at)}
-          </dd>
+          <dd className="font-medium text-ink">{formatearFechaHora(solicitud.created_at)}</dd>
         </div>
       </dl>
 

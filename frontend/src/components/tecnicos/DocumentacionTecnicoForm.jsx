@@ -21,10 +21,7 @@ function validarArchivo(archivo) {
   return ''
 }
 
-export default function DocumentacionTecnicoForm({
-  documentacion = {},
-  onGuardar,
-}) {
+export default function DocumentacionTecnicoForm({ documentacion = {}, onGuardar }) {
   const archivoDniRef = useRef(null)
   const archivoMatriculaRef = useRef(null)
   const faltantes = []
@@ -35,9 +32,7 @@ export default function DocumentacionTecnicoForm({
   const documentoDniId = useId()
   const documentoMatriculaId = useId()
   const [dniNumero, setDniNumero] = useState(documentacion.dni_numero ?? '')
-  const [matriculaNumero, setMatriculaNumero] = useState(
-    documentacion.matricula_numero ?? '',
-  )
+  const [matriculaNumero, setMatriculaNumero] = useState(documentacion.matricula_numero ?? '')
   const [documentoDni, setDocumentoDni] = useState(null)
   const [documentoMatricula, setDocumentoMatricula] = useState(null)
   const [guardando, setGuardando] = useState(false)
@@ -76,9 +71,11 @@ export default function DocumentacionTecnicoForm({
       const archivosFaltantes = []
       if (!guardada.tiene_documento_dni) archivosFaltantes.push('DNI')
       if (!guardada.tiene_documento_matricula) archivosFaltantes.push('matrícula')
-      setMensaje(archivosFaltantes.length
-        ? `Datos guardados. Falta adjuntar: ${archivosFaltantes.join(' y ')}.`
-        : 'Documentación completa guardada. Pendiente de revisión; todavía no está aprobada.')
+      setMensaje(
+        archivosFaltantes.length
+          ? `Datos guardados. Falta adjuntar: ${archivosFaltantes.join(' y ')}.`
+          : 'Documentación completa guardada. Pendiente de revisión; todavía no está aprobada.',
+      )
       if (archivoDniRef.current) archivoDniRef.current.value = ''
       if (archivoMatriculaRef.current) archivoMatriculaRef.current.value = ''
       setDocumentoDni(null)
@@ -102,7 +99,8 @@ export default function DocumentacionTecnicoForm({
         </p>
         {faltantes.length > 0 && (
           <p className="mt-3 rounded-lg border border-warning bg-amber-50 p-3 text-sm text-amber-900">
-            Falta adjuntar: {faltantes.join(' y ')}. Podés guardar los números y completar los archivos después.
+            Falta adjuntar: {faltantes.join(' y ')}. Podés guardar los números y completar los
+            archivos después.
           </p>
         )}
       </header>
@@ -110,14 +108,23 @@ export default function DocumentacionTecnicoForm({
       <div className="grid gap-5 sm:grid-cols-2">
         <label htmlFor={dniId} className="space-y-2 font-semibold text-ink">
           Número de DNI
-          <input id={dniId} value={dniNumero} onChange={(event) => setDniNumero(event.target.value)}
-            disabled={guardando} className="mt-input" />
+          <input
+            id={dniId}
+            value={dniNumero}
+            onChange={(event) => setDniNumero(event.target.value)}
+            disabled={guardando}
+            className="mt-input"
+          />
         </label>
         <label htmlFor={matriculaId} className="space-y-2 font-semibold text-ink">
           Número de matrícula
-          <input id={matriculaId} value={matriculaNumero}
-            onChange={(event) => setMatriculaNumero(event.target.value)} disabled={guardando}
-            className="mt-input" />
+          <input
+            id={matriculaId}
+            value={matriculaNumero}
+            onChange={(event) => setMatriculaNumero(event.target.value)}
+            disabled={guardando}
+            className="mt-input"
+          />
         </label>
       </div>
 
@@ -125,10 +132,19 @@ export default function DocumentacionTecnicoForm({
         <label htmlFor={documentoDniId} className="block font-semibold text-ink">
           Archivo de DNI
         </label>
-        <input id={documentoDniId} ref={archivoDniRef} type="file" className="mt-file" accept=".pdf,.jpg,.jpeg,.png"
-          disabled={guardando} onChange={(event) => setDocumentoDni(event.target.files[0] ?? null)} />
+        <input
+          id={documentoDniId}
+          ref={archivoDniRef}
+          type="file"
+          className="mt-file"
+          accept=".pdf,.jpg,.jpeg,.png"
+          disabled={guardando}
+          onChange={(event) => setDocumentoDni(event.target.files[0] ?? null)}
+        />
         <p className="text-sm text-ink">
-          {documentacion.tiene_documento_dni ? 'Ya existe un archivo cargado. Elegir otro lo reemplazará.' : 'Todavía no hay un archivo cargado.'}
+          {documentacion.tiene_documento_dni
+            ? 'Ya existe un archivo cargado. Elegir otro lo reemplazará.'
+            : 'Todavía no hay un archivo cargado.'}
         </p>
       </div>
 
@@ -136,20 +152,35 @@ export default function DocumentacionTecnicoForm({
         <label htmlFor={documentoMatriculaId} className="block font-semibold text-ink">
           Archivo de matrícula
         </label>
-        <input id={documentoMatriculaId} ref={archivoMatriculaRef} type="file" className="mt-file" accept=".pdf,.jpg,.jpeg,.png"
+        <input
+          id={documentoMatriculaId}
+          ref={archivoMatriculaRef}
+          type="file"
+          className="mt-file"
+          accept=".pdf,.jpg,.jpeg,.png"
           disabled={guardando}
-          onChange={(event) => setDocumentoMatricula(event.target.files[0] ?? null)} />
+          onChange={(event) => setDocumentoMatricula(event.target.files[0] ?? null)}
+        />
         <p className="text-sm text-ink">
-          {documentacion.tiene_documento_matricula ? 'Ya existe un archivo cargado. Elegir otro lo reemplazará.' : 'Todavía no hay un archivo cargado.'}
+          {documentacion.tiene_documento_matricula
+            ? 'Ya existe un archivo cargado. Elegir otro lo reemplazará.'
+            : 'Todavía no hay un archivo cargado.'}
         </p>
       </div>
 
-      <p className="text-sm text-ink">Formatos permitidos: PDF, JPG, JPEG y PNG. Máximo 5 MB por archivo.</p>
+      <p className="text-sm text-ink">
+        Formatos permitidos: PDF, JPG, JPEG y PNG. Máximo 5 MB por archivo.
+      </p>
       {!conectado && <p className="text-sm text-ink">El guardado todavía no está conectado.</p>}
-      {error && <p role="alert" className="border-l-4 border-danger pl-3 text-red-800">{error}</p>}
-      <p role="status" className={mensaje ? "border-l-4 border-success pl-3 text-green-800" : ""}>{mensaje}</p>
-      <button type="submit" disabled={!conectado || guardando}
-        className="mt-button">
+      {error && (
+        <p role="alert" className="border-l-4 border-danger pl-3 text-red-800">
+          {error}
+        </p>
+      )}
+      <p role="status" className={mensaje ? 'border-l-4 border-success pl-3 text-green-800' : ''}>
+        {mensaje}
+      </p>
+      <button type="submit" disabled={!conectado || guardando} className="mt-button">
         {guardando ? 'Guardando…' : 'Guardar documentación'}
       </button>
     </form>

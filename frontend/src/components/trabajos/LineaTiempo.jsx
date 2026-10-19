@@ -43,9 +43,7 @@ function LineaTiempo({ pasos }) {
               </p>
               <p className="text-sm text-slate-600">{paso.descripcion}</p>
               {paso.fecha && (
-                <p className="text-xs font-medium text-brand">
-                  {formatearFechaHora(paso.fecha)}
-                </p>
+                <p className="text-xs font-medium text-brand">{formatearFechaHora(paso.fecha)}</p>
               )}
             </div>
           </li>

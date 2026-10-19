@@ -18,13 +18,8 @@ import {
 import { listarTrabajos } from '../services/trabajosApi'
 import { mensajeError } from '../utils/errores'
 import { formatearDinero, nombreVisible } from '../utils/formato'
-import {
-  ENLACES_CLIENTE,
-  RUTA_SOLICITUDES_CLIENTE,
-  rutaTrabajo,
-} from '../utils/navegacion'
+import { ENLACES_CLIENTE, RUTA_SOLICITUDES_CLIENTE, rutaTrabajo } from '../utils/navegacion'
 import FormularioValidarCodigo from '../components/token/FormularioValidarCodigo'
-
 
 const CLASE_BOTON_ENLACE = 'mt-button inline-flex items-center justify-center'
 const ORDEN_ESTADO = { aceptada: 0, pendiente: 1, rechazada: 2 }
@@ -235,7 +230,10 @@ function DetalleSolicitudPage() {
       {!cargando && !error && solicitud && (
         <>
           {aviso && (
-            <p role="status" className="rounded-lg bg-emerald-100 p-3 text-sm font-medium text-emerald-800">
+            <p
+              role="status"
+              className="rounded-lg bg-emerald-100 p-3 text-sm font-medium text-emerald-800"
+            >
               {aviso}
             </p>
           )}
@@ -281,12 +279,14 @@ function DetalleSolicitudPage() {
                 El pago se acuerda directamente con el técnico, fuera de MiTécnico.
               </p>
 
-              {datos.trabajo.estado === 'pendiente' && <div className="mt-4 border-t border-slate-200 pt-4">
-                <FormularioValidarCodigo 
-                  trabajoId={datos.trabajo.id} 
-                  onValidado={alValidarCodigo}
-                />
-              </div>}
+              {datos.trabajo.estado === 'pendiente' && (
+                <div className="mt-4 border-t border-slate-200 pt-4">
+                  <FormularioValidarCodigo
+                    trabajoId={datos.trabajo.id}
+                    onValidado={alValidarCodigo}
+                  />
+                </div>
+              )}
 
               <Link to={rutaTrabajo(datos.trabajo.id)} className={CLASE_BOTON_ENLACE}>
                 Ver seguimiento del trabajo

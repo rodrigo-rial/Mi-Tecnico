@@ -7,10 +7,7 @@ function soloActivos(lista) {
 
 /** Especialidades y zonas activas para los selects. */
 export async function cargarCatalogos() {
-  const [especialidades, zonas] = await Promise.all([
-    obtenerEspecialidades(),
-    obtenerZonas(),
-  ])
+  const [especialidades, zonas] = await Promise.all([obtenerEspecialidades(), obtenerZonas()])
 
   return {
     especialidades: soloActivos(extraerLista(especialidades)),
