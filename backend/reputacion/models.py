@@ -5,7 +5,6 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-# SUPUESTO: la app de Trabajo se llama "solicitudes". Si no, cambiar este import.
 from solicitudes.models import Trabajo
 
 

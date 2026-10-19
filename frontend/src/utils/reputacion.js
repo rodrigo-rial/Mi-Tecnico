@@ -1,4 +1,4 @@
-// Un id puede venir como número (5) o como objeto ({ id: 5 }) según el serializer de Int. 3.
+// Admite un identificador directo o un objeto con la propiedad id.
 export function idDe(valor) {
   return valor !== null && typeof valor === 'object' ? valor.id : valor
 }

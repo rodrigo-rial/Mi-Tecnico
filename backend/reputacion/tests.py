@@ -1,6 +1,5 @@
 from django.test import TestCase
 
-# Create your tests here.
 import shutil
 import tempfile
 from datetime import date
@@ -13,7 +12,6 @@ from django.test import override_settings
 from PIL import Image
 from rest_framework.test import APITestCase
 
-# SUPUESTO: nombres de apps. Cambiar acá si difieren.
 from solicitudes.models import Propuesta, Solicitud, Trabajo
 from tecnicos.models import Especialidad, Zona
 
@@ -29,7 +27,6 @@ def crear_usuario(email, rol):
 
 
 def crear_trabajo(cliente, tecnico, estado=Trabajo.Estado.FINALIZADO):
-    # SUPUESTO: Especialidad y Zona tienen campo "nombre".
     especialidad, _ = Especialidad.objects.get_or_create(nombre="Plomería")
     zona, _ = Zona.objects.get_or_create(nombre="Centro")
     solicitud = Solicitud.objects.create(

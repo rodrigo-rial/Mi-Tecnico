@@ -9,7 +9,7 @@ import GaleriaFotos from './GaleriaFotos'
 import ListaCalificaciones from './ListaCalificaciones'
 import SubirFotosTrabajo from './SubirFotosTrabajo'
 
-// Componente para el detalle del trabajo (lo importa Int. 3).
+// Reúne calificaciones y fotos del resultado en el detalle del trabajo.
 // Props: trabajo = { id, estado, cliente, tecnico } y usuarioId = id del usuario logueado.
 export default function PanelReputacionTrabajo({ trabajo, usuarioId }) {
   const esCliente = usuarioId === idDe(trabajo.cliente)
