@@ -5,7 +5,6 @@ from django.db import IntegrityError, transaction
 from django.db.models import Avg, Count
 from PIL import Image
 
-# SUPUESTO: la app de Trabajo se llama "solicitudes".
 from solicitudes.models import Trabajo
 
 from .models import Calificacion, FotoTrabajo
@@ -115,7 +114,7 @@ def subir_foto(*, usuario, trabajo_id, imagen, descripcion=""):
         if usuario.pk != trabajo.tecnico_id:
             raise PermissionDenied("Solo el técnico del trabajo puede subir fotos.")
 
-        # SUPUESTO: "trabajo terminado" = estado finalizado
+        # Las fotos del resultado solo se admiten al finalizar el trabajo.
         if trabajo.estado != Trabajo.Estado.FINALIZADO:
             raise ValidationError("Solo se pueden subir fotos de un trabajo finalizado.")
 

@@ -32,9 +32,7 @@ export function cancelarSolicitud(id) {
 
 // Solo el cliente dueño de la solicitud.
 export function listarPropuestasDeSolicitud(solicitudId) {
-  return solicitarAutenticado(`/solicitudes/${solicitudId}/propuestas/`).then(
-    extraerLista,
-  )
+  return solicitarAutenticado(`/solicitudes/${solicitudId}/propuestas/`).then(extraerLista)
 }
 
 // Solo técnico aprobado.

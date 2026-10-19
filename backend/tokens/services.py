@@ -161,7 +161,7 @@ def validar_token(trabajo, usuario, codigo):
                 token.validado_en = ahora
                 token.intentos_fallidos = 0
                 token.save(update_fields=["estado", "validado_en", "intentos_fallidos"])
-                # T3: validar la visita inicia el trabajo. Borrá este bloque si Int. 3 lo prefiere.
+                # La validación del cliente inicia el trabajo pendiente.
                 if trabajo.estado == Trabajo.Estado.PENDIENTE:
                     trabajo.cambiar_estado(Trabajo.Estado.EN_PROCESO)
                 return token

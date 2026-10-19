@@ -1,3 +1,4 @@
+import { formatearDinero } from '../utils/formato'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -41,11 +42,15 @@ function MisTrabajosPage() {
 
     Promise.all([
       listarTrabajos(),
-      usuario.rol === 'CLIENTE' ? solicitarAutenticado('/urgencias/').then(extraerLista) : Promise.resolve([]),
+      usuario.rol === 'CLIENTE'
+        ? solicitarAutenticado('/urgencias/').then(extraerLista)
+        : Promise.resolve([]),
     ])
       .then(([datos, urgencias]) => {
         if (!pantallaActiva) return
-        const asignados = new Set(urgencias.flatMap((u) => u.asignaciones.map((a) => String(a.trabajo))))
+        const asignados = new Set(
+          urgencias.flatMap((u) => u.asignaciones.map((a) => String(a.trabajo))),
+        )
         const servicios = [
           ...datos.filter((t) => !asignados.has(String(t.id))),
           ...urgencias.map((u) => ({
@@ -53,9 +58,14 @@ function MisTrabajosPage() {
             id: `urgencia-${u.id}`,
             urgenciaId: u.id,
             created_at: u.creada_en,
-            estado: u.estado === 'cancelada' ? 'cancelado'
-              : u.estado === 'finalizada' ? 'finalizado'
-                : u.estado === 'asignada' && u.asignaciones.some((a) => a.estado === 'en_proceso') ? 'en_proceso' : 'pendiente',
+            estado:
+              u.estado === 'cancelada'
+                ? 'cancelado'
+                : u.estado === 'finalizada'
+                  ? 'finalizado'
+                  : u.estado === 'asignada' && u.asignaciones.some((a) => a.estado === 'en_proceso')
+                    ? 'en_proceso'
+                    : 'pendiente',
             buscando: u.estado === 'buscando',
           })),
         ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
@@ -109,7 +119,9 @@ function MisTrabajosPage() {
 
       {!enCarga && !error && trabajos.length === 0 && (
         <EstadoVacio
-          titulo={rol === 'CLIENTE' ? 'Todavía no contrataste servicios' : 'Todavía no tenés trabajos'}
+          titulo={
+            rol === 'CLIENTE' ? 'Todavía no contrataste servicios' : 'Todavía no tenés trabajos'
+          }
           descripcion={
             rol === 'TECNICO'
               ? 'Cuando un cliente acepte una de tus propuestas, el trabajo aparece acá.'
@@ -145,21 +157,37 @@ function MisTrabajosPage() {
             />
           ) : (
             <div className="grid gap-4 lg:grid-cols-2">
-              {visibles.map((trabajo) => (
-                trabajo.urgenciaId ? <article key={trabajo.id} className="mt-card space-y-3">
-                  <div className="flex flex-wrap justify-between gap-2">
-                    <h2 className="text-lg font-semibold">Urgencia: {trabajo.especialidad_nombre}</h2>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge texto="Urgente" tono="error" />
-                      <Badge estado={trabajo.estado} texto={trabajo.buscando ? 'Buscando técnico' : undefined} />
+              {visibles.map((trabajo) =>
+                trabajo.urgenciaId ? (
+                  <article key={trabajo.id} className="mt-card space-y-3">
+                    <div className="flex flex-wrap justify-between gap-2">
+                      <h2 className="text-lg font-semibold">
+                        Urgencia: {trabajo.especialidad_nombre}
+                      </h2>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge texto="Urgente" tono="error" />
+                        <Badge
+                          estado={trabajo.estado}
+                          texto={trabajo.buscando ? 'Buscando técnico' : undefined}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-sm text-slate-600">{trabajo.zona_nombre}</p>
-                  <p>{trabajo.descripcion}</p>
-                  <p className="text-sm">Visita: $40.000 · Adicionales a acordar</p>
-                  <Link className="text-brand font-semibold" to={`/cliente/urgencias?id=${trabajo.urgenciaId}`}>Ver seguimiento</Link>
-                </article> : <TrabajoCard key={trabajo.id} trabajo={trabajo} />
-              ))}
+                    <p className="text-sm text-slate-600">{trabajo.zona_nombre}</p>
+                    <p>{trabajo.descripcion}</p>
+                    <p className="text-sm">
+                      Visita: {formatearDinero(trabajo.tarifa_visita)} · Adicionales a acordar
+                    </p>
+                    <Link
+                      className="text-brand font-semibold"
+                      to={`/cliente/urgencias?id=${trabajo.urgenciaId}`}
+                    >
+                      Ver seguimiento
+                    </Link>
+                  </article>
+                ) : (
+                  <TrabajoCard key={trabajo.id} trabajo={trabajo} />
+                ),
+              )}
             </div>
           )}
         </>

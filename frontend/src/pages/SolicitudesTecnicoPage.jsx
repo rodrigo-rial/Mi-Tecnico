@@ -55,9 +55,7 @@ function SolicitudesTecnicoPage() {
         if (!pantallaActiva) return
         setSolicitudes(datos.solicitudes)
         setEstado(datos.estado)
-        setPropuestasPorSolicitud(
-          Object.fromEntries(datos.propuestas.map((p) => [p.solicitud, p])),
-        )
+        setPropuestasPorSolicitud(Object.fromEntries(datos.propuestas.map((p) => [p.solicitud, p])))
         setError('')
       })
       .catch((errorCarga) => {
@@ -91,8 +89,7 @@ function SolicitudesTecnicoPage() {
     setAviso('Tu propuesta fue enviada. El cliente la va a revisar.')
   }
 
-  const visibles =
-    filtro === 'urgentes' ? solicitudes.filter((s) => s.es_urgente) : solicitudes
+  const visibles = filtro === 'urgentes' ? solicitudes.filter((s) => s.es_urgente) : solicitudes
   const verificado = estado === undefined || estado === 'APROBADO'
 
   return (
@@ -106,7 +103,10 @@ function SolicitudesTecnicoPage() {
       <AvisoVerificacion estado={estado} />
 
       {aviso && (
-        <p role="status" className="rounded-lg bg-emerald-100 p-3 text-sm font-medium text-emerald-800">
+        <p
+          role="status"
+          className="rounded-lg bg-emerald-100 p-3 text-sm font-medium text-emerald-800"
+        >
           {aviso}
         </p>
       )}

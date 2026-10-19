@@ -1,10 +1,6 @@
 import CatalogoTecnicosPage from './pages/CatalogoTecnicosPage'
 import PerfilProfesionalPage from './pages/PerfilProfesionalPage'
-import {
-  Navigate,
-  Route,
-  Routes,
-} from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 
 import UrgenciasPage from './pages/UrgenciasPage'
 import LoginPage from './pages/LoginPage'
@@ -23,105 +19,37 @@ import RutaProtegida from './components/RutaProtegida'
 function App() {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={<Navigate to="/login" replace />}
-      />
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-      <Route
-        path="/registro"
-        element={<RegistroPage />}
-      />
+      <Route path="/registro" element={<RegistroPage />} />
 
-      <Route
-        path="/login"
-        element={<LoginPage />}
-      />
+      <Route path="/login" element={<LoginPage />} />
 
-      <Route
-        element={(
-          <RutaProtegida
-            rolesPermitidos={['CLIENTE', 'TECNICO', 'ADMINISTRADOR']}
-          />
-        )}
-      >
-        <Route
-          path="/cuenta"
-          element={<CuentaPage />}
-        />
+      <Route element={<RutaProtegida rolesPermitidos={['CLIENTE', 'TECNICO', 'ADMINISTRADOR']} />}>
+        <Route path="/cuenta" element={<CuentaPage />} />
       </Route>
 
-      <Route
-        element={(
-          <RutaProtegida rolesPermitidos={['CLIENTE']} />
-        )}
-      >
-        <Route
-          path="/cliente/tecnicos"
-          element={<CatalogoTecnicosPage />}
-        />
-        <Route
-          path="/cliente/tecnicos/:id"
-          element={<PerfilProfesionalPage />}
-        />
-        <Route
-          path="/cliente/solicitudes"
-          element={<SolicitudesClientePage />}
-        />
-        <Route
-          path="/cliente/urgencias"
-          element={<UrgenciasPage />}
-        />
-        <Route
-          path="/cliente/solicitudes/nueva"
-          element={<NuevaSolicitudPage />}
-        />
-        <Route
-          path="/cliente/solicitudes/:id"
-          element={<DetalleSolicitudPage />}
-        />
+      <Route element={<RutaProtegida rolesPermitidos={['CLIENTE']} />}>
+        <Route path="/cliente/tecnicos" element={<CatalogoTecnicosPage />} />
+        <Route path="/cliente/tecnicos/:id" element={<PerfilProfesionalPage />} />
+        <Route path="/cliente/solicitudes" element={<SolicitudesClientePage />} />
+        <Route path="/cliente/urgencias" element={<UrgenciasPage />} />
+        <Route path="/cliente/solicitudes/nueva" element={<NuevaSolicitudPage />} />
+        <Route path="/cliente/solicitudes/:id" element={<DetalleSolicitudPage />} />
       </Route>
 
-      <Route
-        element={(
-          <RutaProtegida
-            rolesPermitidos={['CLIENTE', 'TECNICO']}
-          />
-        )}
-      >
-        <Route
-          path="/trabajos"
-          element={<MisTrabajosPage />}
-        />
-        <Route
-          path="/trabajos/:id"
-          element={<TrabajoDetallePage />}
-        />
+      <Route element={<RutaProtegida rolesPermitidos={['CLIENTE', 'TECNICO']} />}>
+        <Route path="/trabajos" element={<MisTrabajosPage />} />
+        <Route path="/trabajos/:id" element={<TrabajoDetallePage />} />
       </Route>
 
-      <Route
-        element={(
-          <RutaProtegida rolesPermitidos={['TECNICO']} />
-        )}
-      >
-        <Route
-          path="/tecnico"
-          element={<PanelTecnicoToken />}
-        />
-        <Route
-          path="/tecnico/solicitudes"
-          element={<SolicitudesTecnicoPage />}
-        />
-        <Route
-          path="/tecnico/propuestas"
-          element={<MisPropuestasPage />}
-        />
+      <Route element={<RutaProtegida rolesPermitidos={['TECNICO']} />}>
+        <Route path="/tecnico" element={<PanelTecnicoToken />} />
+        <Route path="/tecnico/solicitudes" element={<SolicitudesTecnicoPage />} />
+        <Route path="/tecnico/propuestas" element={<MisPropuestasPage />} />
       </Route>
 
-      <Route
-        path="*"
-        element={<Navigate to="/login" replace />}
-      />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
 }

@@ -4,7 +4,7 @@ from .models import Calificacion, FotoTrabajo
 
 
 def _nombre(usuario):
-    # SUPUESTO: User tiene email; si tiene get_full_name() lo usamos primero.
+    # Prioriza el nombre completo; usa el correo como alternativa.
     nombre = usuario.get_full_name() if hasattr(usuario, "get_full_name") else ""
     return nombre or getattr(usuario, "email", str(usuario))
 

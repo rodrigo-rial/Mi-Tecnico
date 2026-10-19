@@ -1,29 +1,29 @@
-import { useState } from "react";
-import { crearCalificacion } from "../../services/reputacionService";
-import SelectorEstrellas from "./SelectorEstrellas";
+import { useState } from 'react'
+import { crearCalificacion } from '../../services/reputacionService'
+import SelectorEstrellas from './SelectorEstrellas'
 
 export default function FormularioCalificacion({ trabajoId, onCalificado }) {
-  const [puntaje, setPuntaje] = useState(0);
-  const [comentario, setComentario] = useState("");
-  const [enviando, setEnviando] = useState(false);
-  const [error, setError] = useState("");
+  const [puntaje, setPuntaje] = useState(0)
+  const [comentario, setComentario] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const [error, setError] = useState('')
 
   async function enviar(evento) {
-    evento.preventDefault();
-    setError("");
+    evento.preventDefault()
+    setError('')
     // Validación de comodidad; la validación real está en el backend.
     if (puntaje === 0) {
-      setError("Elegí un puntaje de 1 a 5 estrellas.");
-      return;
+      setError('Elegí un puntaje de 1 a 5 estrellas.')
+      return
     }
-    setEnviando(true);
+    setEnviando(true)
     try {
-      await crearCalificacion({ trabajo: trabajoId, puntaje, comentario });
-      onCalificado();
+      await crearCalificacion({ trabajo: trabajoId, puntaje, comentario })
+      onCalificado()
     } catch (e) {
-      setError(e.message);
+      setError(e.message)
     } finally {
-      setEnviando(false);
+      setEnviando(false)
     }
   }
 
@@ -48,7 +48,9 @@ export default function FormularioCalificacion({ trabajoId, onCalificado }) {
       </div>
 
       {error && (
-        <p role="alert" className="text-sm font-medium text-[#ef4444]">{error}</p>
+        <p role="alert" className="text-sm font-medium text-[#ef4444]">
+          {error}
+        </p>
       )}
 
       <button
@@ -56,8 +58,8 @@ export default function FormularioCalificacion({ trabajoId, onCalificado }) {
         disabled={enviando}
         className="rounded-lg bg-[#1a73e8] px-4 py-2 font-medium text-white hover:bg-[#1447e6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447e6] disabled:opacity-60"
       >
-        {enviando ? "Enviando…" : "Enviar calificación"}
+        {enviando ? 'Enviando…' : 'Enviar calificación'}
       </button>
     </form>
-  );
+  )
 }

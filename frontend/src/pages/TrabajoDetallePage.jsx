@@ -12,11 +12,7 @@ import { useUsuarioActual } from '../hooks/useUsuarioActual'
 import { cambiarEstadoTrabajo, obtenerTrabajo } from '../services/trabajosApi'
 import { mensajeError } from '../utils/errores'
 import { formatearDinero, formatearFechaHora, nombreVisible } from '../utils/formato'
-import {
-  RUTA_TRABAJOS,
-  enlacesPorRol,
-  rutaDetalleSolicitud,
-} from '../utils/navegacion'
+import { RUTA_TRABAJOS, enlacesPorRol, rutaDetalleSolicitud } from '../utils/navegacion'
 import { accionesDisponibles, armarPasos } from '../utils/trabajos'
 import CodigoSeguridadTecnico from '../components/token/CodigoSeguridadTecnico'
 import FormularioValidarCodigo from '../components/token/FormularioValidarCodigo'
@@ -103,10 +99,17 @@ function TrabajoDetallePage() {
   }
 
   const rol = usuario?.rol
-  const acciones = trabajo ? accionesDisponibles(trabajo.estado, rol).map((item) =>
-    trabajo.urgencia_id && rol === 'TECNICO' && item.estado === 'cancelado'
-      ? { ...item, mensaje: 'Se cancelará tu visita y buscaremos otro técnico para el cliente. Tu disponibilidad seguirá desactivada.' }
-      : item) : []
+  const acciones = trabajo
+    ? accionesDisponibles(trabajo.estado, rol).map((item) =>
+        trabajo.urgencia_id && rol === 'TECNICO' && item.estado === 'cancelado'
+          ? {
+              ...item,
+              mensaje:
+                'Se cancelará tu visita y buscaremos otro técnico para el cliente. Tu disponibilidad seguirá desactivada.',
+            }
+          : item,
+      )
+    : []
   const enCarga = cargando || cargandoUsuario
 
   return (
@@ -147,7 +150,10 @@ function TrabajoDetallePage() {
       {!enCarga && !error && trabajo && (
         <>
           {aviso && (
-            <p role="status" className="rounded-lg bg-emerald-100 p-3 text-sm font-medium text-emerald-800">
+            <p
+              role="status"
+              className="rounded-lg bg-emerald-100 p-3 text-sm font-medium text-emerald-800"
+            >
               {aviso}
             </p>
           )}
@@ -198,25 +204,45 @@ function TrabajoDetallePage() {
               El pago se acuerda directamente entre las partes, fuera de MiTécnico.
             </p>
 
-            {trabajo.urgencia_id && <div className="rounded-lg bg-amber-50 p-3 space-y-2"><p className="font-semibold">Visita urgente · $40.000</p><p className="text-sm">El precio corresponde a la visita. Reparaciones y materiales adicionales se acuerdan aparte.</p>{rol === 'CLIENTE' && <Link className="text-brand" to={`/cliente/urgencias?id=${trabajo.urgencia_id}`}>Ver estado de la urgencia y reemplazos →</Link>}</div>}
-            {/* CÓDIGO DE SEGURIDAD PARA EL TÉCNICO */}
-            {rol === 'TECNICO' && (trabajo.estado === 'pendiente' || trabajo.estado === 'en_proceso') && (
-              <div className="mt-4 border-t border-slate-200 pt-4">
-                <CodigoSeguridadTecnico trabajoId={id} /> 
+            {trabajo.urgencia_id && (
+              <div className="rounded-lg bg-amber-50 p-3 space-y-2">
+                <p className="font-semibold">
+                  Visita urgente · {formatearDinero(trabajo.precio_acordado)}
+                </p>
+                <p className="text-sm">
+                  El precio corresponde a la visita. Reparaciones y materiales adicionales se
+                  acuerdan aparte.
+                </p>
+                {rol === 'CLIENTE' && (
+                  <Link className="text-brand" to={`/cliente/urgencias?id=${trabajo.urgencia_id}`}>
+                    Ver estado de la urgencia y reemplazos →
+                  </Link>
+                )}
               </div>
             )}
-
+            {/* CÓDIGO DE SEGURIDAD PARA EL TÉCNICO */}
+            {rol === 'TECNICO' &&
+              (trabajo.estado === 'pendiente' || trabajo.estado === 'en_proceso') && (
+                <div className="mt-4 border-t border-slate-200 pt-4">
+                  <CodigoSeguridadTecnico trabajoId={id} />
+                </div>
+              )}
 
             {rol === 'CLIENTE' && trabajo.estado === 'pendiente' && (
               <div className="mt-4 border-t border-slate-200 pt-4">
-                <FormularioValidarCodigo trabajoId={id} onValidado={() => {
-                  setAviso('Código validado. El trabajo está en proceso.')
-                  reintentar()
-                }} />
+                <FormularioValidarCodigo
+                  trabajoId={id}
+                  onValidado={() => {
+                    setAviso('Código validado. El trabajo está en proceso.')
+                    reintentar()
+                  }}
+                />
               </div>
             )}
             {rol === 'TECNICO' && trabajo.estado === 'pendiente' && (
-              <button type="button" className="mt-button" onClick={reintentar}>Actualizar estado</button>
+              <button type="button" className="mt-button" onClick={reintentar}>
+                Actualizar estado
+              </button>
             )}
             {rol === 'CLIENTE' && (
               <p>

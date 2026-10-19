@@ -1,15 +1,13 @@
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api'
-).replace(/\/$/, '')
+const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api').replace(
+  /\/$/,
+  '',
+)
 
 const ACCESS_TOKEN_KEY = 'mitecnico_access'
 const REFRESH_TOKEN_KEY = 'mitecnico_refresh'
 
 function extraerMensajeError(datos, estado) {
-  if (
-    datos?.detail ===
-    'No active account found with the given credentials'
-  ) {
+  if (datos?.detail === 'No active account found with the given credentials') {
     return 'Usuario o contraseña incorrectos.'
   }
 
@@ -18,9 +16,7 @@ function extraerMensajeError(datos, estado) {
   }
 
   if (datos && typeof datos === 'object') {
-    const primerError = Object.values(datos)
-      .flat()
-      .find(Boolean)
+    const primerError = Object.values(datos).flat().find(Boolean)
 
     if (primerError) {
       return String(primerError)
@@ -30,14 +26,7 @@ function extraerMensajeError(datos, estado) {
   return `La solicitud falló con el código ${estado}.`
 }
 
-async function solicitar(
-  ruta,
-  {
-    method = 'GET',
-    token,
-    datos,
-  } = {},
-) {
+async function solicitar(ruta, { method = 'GET', token, datos } = {}) {
   const headers = {}
 
   if (token) {
@@ -51,24 +40,17 @@ async function solicitar(
   const respuesta = await fetch(`${API_BASE_URL}${ruta}`, {
     method,
     headers,
-    body: datos === undefined
-      ? undefined
-      : JSON.stringify(datos),
+    body: datos === undefined ? undefined : JSON.stringify(datos),
   })
 
-  const tipoContenido =
-    respuesta.headers.get('content-type') ?? ''
+  const tipoContenido = respuesta.headers.get('content-type') ?? ''
 
   const tieneJson = tipoContenido.includes('application/json')
 
-  const contenido = tieneJson
-    ? await respuesta.json()
-    : null
+  const contenido = tieneJson ? await respuesta.json() : null
 
   if (!respuesta.ok) {
-    const error = new Error(
-      extraerMensajeError(contenido, respuesta.status),
-    )
+    const error = new Error(extraerMensajeError(contenido, respuesta.status))
 
     error.status = respuesta.status
     error.data = contenido

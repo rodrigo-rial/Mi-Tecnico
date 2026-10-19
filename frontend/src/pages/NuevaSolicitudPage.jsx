@@ -25,14 +25,25 @@ function NuevaSolicitudPage() {
   useEffect(() => {
     let pantallaActiva = true
 
-    Promise.all([cargarCatalogos(), tecnicoId ? solicitarAutenticado(`/tecnicos/${tecnicoId}/profesional/`) : Promise.resolve(null)])
+    Promise.all([
+      cargarCatalogos(),
+      tecnicoId
+        ? solicitarAutenticado(`/tecnicos/${tecnicoId}/profesional/`)
+        : Promise.resolve(null),
+    ])
       .then(([datos, perfil]) => {
         if (!pantallaActiva) return
         setDestinatario(perfil)
-        setCatalogos(perfil ? {
-          especialidades: datos.especialidades.filter((item) => perfil.especialidad_ids.includes(item.id)),
-          zonas: datos.zonas.filter((item) => perfil.zona_ids.includes(item.id)),
-        } : datos)
+        setCatalogos(
+          perfil
+            ? {
+                especialidades: datos.especialidades.filter((item) =>
+                  perfil.especialidad_ids.includes(item.id),
+                ),
+                zonas: datos.zonas.filter((item) => perfil.zona_ids.includes(item.id)),
+              }
+            : datos,
+        )
         setError('')
       })
       .catch((errorCarga) => {
@@ -59,10 +70,15 @@ function NuevaSolicitudPage() {
   }
 
   async function publicar(datos) {
-    await crearSolicitud({ ...datos, ...(tecnicoId ? { tecnico_destinatario: Number(tecnicoId) } : {}) })
+    await crearSolicitud({
+      ...datos,
+      ...(tecnicoId ? { tecnico_destinatario: Number(tecnicoId) } : {}),
+    })
     navigate('/cliente/solicitudes', {
       state: {
-        mensaje: tecnicoId ? 'Pedido enviado al técnico. Esperá su propuesta para confirmar el servicio.' : 'Tu solicitud fue publicada. Los técnicos compatibles ya pueden verla.',
+        mensaje: tecnicoId
+          ? 'Pedido enviado al técnico. Esperá su propuesta para confirmar el servicio.'
+          : 'Tu solicitud fue publicada. Los técnicos compatibles ya pueden verla.',
       },
     })
   }
@@ -70,10 +86,19 @@ function NuevaSolicitudPage() {
   return (
     <LayoutPagina
       titulo="Nueva solicitud"
-      descripcion={tecnicoId ? 'El técnico elegido te enviará su precio y disponibilidad antes de contratar.' : 'Contanos qué necesitás y los técnicos de tu zona te enviarán propuestas.'}
+      descripcion={
+        tecnicoId
+          ? 'El técnico elegido te enviará su precio y disponibilidad antes de contratar.'
+          : 'Contanos qué necesitás y los técnicos de tu zona te enviarán propuestas.'
+      }
       enlaces={ENLACES_CLIENTE}
     >
-      {destinatario && <p className="mt-card">Pedido dirigido a <strong>{destinatario.nombre}</strong>. Solo este técnico podrá responder.</p>}
+      {destinatario && (
+        <p className="mt-card">
+          Pedido dirigido a <strong>{destinatario.nombre}</strong>. Solo este técnico podrá
+          responder.
+        </p>
+      )}
       {cargando && <Spinner texto="Cargando el formulario..." />}
 
       {!cargando && error && (

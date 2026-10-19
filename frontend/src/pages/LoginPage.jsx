@@ -1,14 +1,7 @@
 import { useState } from 'react'
-import {
-  Link,
-  useNavigate,
-} from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
-import {
-  guardarTokens,
-  iniciarSesion,
-  obtenerUsuarioActual,
-} from '../services/authApi'
+import { guardarTokens, iniciarSesion, obtenerUsuarioActual } from '../services/authApi'
 
 import { obtenerRutaPorRol } from '../utils/rutasPorRol'
 
@@ -18,9 +11,7 @@ const CREDENCIALES_INICIALES = {
 }
 
 function LoginPage() {
-  const [credenciales, setCredenciales] = useState(
-    CREDENCIALES_INICIALES,
-  )
+  const [credenciales, setCredenciales] = useState(CREDENCIALES_INICIALES)
 
   const navigate = useNavigate()
 
@@ -54,9 +45,7 @@ function LoginPage() {
 
       const tokens = await iniciarSesion(datosLogin)
 
-      const usuarioActual = await obtenerUsuarioActual(
-        tokens.access,
-      )
+      const usuarioActual = await obtenerUsuarioActual(tokens.access)
       guardarTokens(tokens)
       setUsuario(usuarioActual)
       setCredenciales(CREDENCIALES_INICIALES)
@@ -76,24 +65,14 @@ function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
       <section className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
         <header className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-blue-700">
-            Iniciar sesión
-          </h1>
+          <h1 className="text-3xl font-bold text-blue-700">Iniciar sesión</h1>
 
-          <p className="mt-2 text-slate-600">
-            Ingresá a tu cuenta de MiTécnico.
-          </p>
+          <p className="mt-2 text-slate-600">Ingresá a tu cuenta de MiTécnico.</p>
         </header>
 
-        <form
-          className="grid gap-5"
-          onSubmit={manejarEnvio}
-        >
+        <form className="grid gap-5" onSubmit={manejarEnvio}>
           <div>
-            <label
-              className="mb-1 block font-medium text-slate-700"
-              htmlFor="username"
-            >
+            <label className="mb-1 block font-medium text-slate-700" htmlFor="username">
               Nombre de usuario
             </label>
 
@@ -110,10 +89,7 @@ function LoginPage() {
           </div>
 
           <div>
-            <label
-              className="mb-1 block font-medium text-slate-700"
-              htmlFor="password"
-            >
+            <label className="mb-1 block font-medium text-slate-700" htmlFor="password">
               Contraseña
             </label>
 
@@ -134,16 +110,8 @@ function LoginPage() {
                 onClick={() => {
                   setMostrarPassword((visible) => !visible)
                 }}
-                aria-label={
-                  mostrarPassword
-                    ? 'Ocultar contraseña'
-                    : 'Mostrar contraseña'
-                }
-                title={
-                  mostrarPassword
-                    ? 'Ocultar contraseña'
-                    : 'Mostrar contraseña'
-                }
+                aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                title={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-slate-500 hover:text-blue-700"
               >
                 <svg
@@ -160,33 +128,21 @@ function LoginPage() {
                   <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
                   <circle cx="12" cy="12" r="3" />
 
-                  {mostrarPassword && (
-                    <path d="M4 4l16 16" />
-                  )}
+                  {mostrarPassword && <path d="M4 4l16 16" />}
                 </svg>
               </button>
             </div>
           </div>
 
-          {error && (
-            <p className="rounded-lg bg-red-100 p-3 text-red-700">
-              {error}
-            </p>
-          )}
+          {error && <p className="rounded-lg bg-red-100 p-3 text-red-700">{error}</p>}
 
           {usuario && (
             <div className="rounded-lg bg-green-100 p-3 text-green-800">
-              <p className="font-semibold">
-                Inicio de sesión correcto.
-              </p>
+              <p className="font-semibold">Inicio de sesión correcto.</p>
 
-              <p className="mt-1 text-sm">
-                Usuario: {usuario.username}
-              </p>
+              <p className="mt-1 text-sm">Usuario: {usuario.username}</p>
 
-              <p className="text-sm">
-                Rol: {usuario.rol}
-              </p>
+              <p className="text-sm">Rol: {usuario.rol}</p>
             </div>
           )}
 
@@ -201,10 +157,7 @@ function LoginPage() {
 
         <p className="mt-6 text-center text-slate-600">
           ¿Todavía no tenés una cuenta?{' '}
-          <Link
-            to="/registro"
-            className="font-semibold text-blue-700 hover:underline"
-          >
+          <Link to="/registro" className="font-semibold text-blue-700 hover:underline">
             Registrarse
           </Link>
         </p>

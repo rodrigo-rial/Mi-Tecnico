@@ -35,12 +35,7 @@ function ModalConfirmacion({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={idTitulo}
-        className="mt-card max-w-md"
-      >
+      <div role="dialog" aria-modal="true" aria-labelledby={idTitulo} className="mt-card max-w-md">
         <h2 id={idTitulo} className="text-lg font-semibold text-ink">
           {titulo}
         </h2>

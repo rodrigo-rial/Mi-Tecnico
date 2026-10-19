@@ -1,11 +1,7 @@
 import { Link } from 'react-router-dom'
 import ResumenReputacion from '../reputacion/ResumenReputacion'
 import Badge from '../comunes/Badge'
-import {
-  formatearDinero,
-  formatearFecha,
-  nombreVisible,
-} from '../../utils/formato'
+import { formatearDinero, formatearFecha, nombreVisible } from '../../utils/formato'
 
 const CLASE_BOTON_SECUNDARIO =
   'min-h-11 rounded-lg border border-line bg-surface px-5 py-3 font-semibold text-ink transition-colors hover:bg-canvas'
@@ -28,11 +24,14 @@ function PropuestaCard({ propuesta, puedeResponder, onAceptar, onRechazar }) {
 
       <div className="mt-3 space-y-2">
         <ResumenReputacion usuarioId={propuesta.tecnico} />
-        <Link className="inline-flex min-h-11 items-center font-semibold text-brand hover:underline" to={`/cliente/tecnicos/${propuesta.tecnico}`}>Ver perfil profesional</Link>
+        <Link
+          className="inline-flex min-h-11 items-center font-semibold text-brand hover:underline"
+          to={`/cliente/tecnicos/${propuesta.tecnico}`}
+        >
+          Ver perfil profesional
+        </Link>
       </div>
-      <p className="mt-4 text-2xl font-bold text-brand-dark">
-        {formatearDinero(propuesta.precio)}
-      </p>
+      <p className="mt-4 text-2xl font-bold text-brand-dark">{formatearDinero(propuesta.precio)}</p>
       <p className="text-xs text-slate-500">Precio estimado</p>
 
       <p className="mt-3 whitespace-pre-line text-ink">{propuesta.descripcion_solucion}</p>

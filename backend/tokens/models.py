@@ -2,9 +2,9 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
-# T1: cuánto dura vigente un código desde que se genera.
+# Vigencia del código desde su generación.
 DIAS_VIGENCIA_TOKEN = 7
-# T2: protección contra adivinar los 6 dígitos probando.
+# Límite de intentos y bloqueo temporal para impedir pruebas repetidas.
 MAX_INTENTOS_FALLIDOS = 5
 MINUTOS_BLOQUEO = 15
 
