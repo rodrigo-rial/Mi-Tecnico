@@ -1,0 +1,177 @@
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.utils import timezone
+from rest_framework import serializers
+
+from .models import Solicitud, FotoSolicitud
+from django.db import transaction
+from solicitudes.models import Propuesta
+
+
+def a_error_drf(exc):
+    """Convierte un ValidationError de Django en uno de DRF."""
+    if hasattr(exc, "error_dict"):
+        return serializers.ValidationError(exc.message_dict)
+    return serializers.ValidationError(exc.messages)
+
+
+class SolicitudSerializer(serializers.ModelSerializer):
+    destinatario_nombre = serializers.SerializerMethodField()
+
+    def get_destinatario_nombre(self, obj):
+        tecnico = obj.tecnico_destinatario
+        return (tecnico.get_full_name() or tecnico.username) if tecnico else None
+
+    fotos = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    imagenes = serializers.ListField(child=serializers.ImageField(), max_length=5, required=False, write_only=True)
+
+    def validate_imagenes(self, archivos):
+        for archivo in archivos:
+            if archivo.size > 5 * 1024 * 1024:
+                raise serializers.ValidationError("Cada foto puede pesar hasta 5 MB.")
+            if archivo.image.format not in {"JPEG", "PNG", "WEBP"}:
+                raise serializers.ValidationError("Usá fotos JPG, PNG o WEBP.")
+        return archivos
+
+    def create(self, validated_data):
+        archivos = validated_data.pop("imagenes", [])
+        guardadas = []
+        try:
+            with transaction.atomic():
+                solicitud = Solicitud.objects.create(**validated_data)
+                for archivo in archivos:
+                    foto = FotoSolicitud(solicitud=solicitud)
+                    foto.imagen.save(archivo.name, archivo, save=False)
+                    guardadas.append(foto.imagen)
+                    foto.save()
+                return solicitud
+        except Exception:
+            for imagen in guardadas:
+                imagen.delete(save=False)
+            raise
+
+    especialidad_nombre = serializers.CharField(
+        source="especialidad.nombre", read_only=True
+    )
+    zona_nombre = serializers.CharField(source="zona.nombre", read_only=True)
+
+    class Meta:
+        model = Solicitud
+        fields = [
+            "id",
+            "cliente",
+            "titulo",
+            "descripcion",
+            "especialidad",
+            "especialidad_nombre",
+            "zona",
+            "zona_nombre",
+            "direccion",
+            "fecha_preferida",
+            "es_urgente",
+            "estado",
+            "created_at",
+            "fotos",
+            "imagenes",
+            "tecnico_destinatario",
+            "destinatario_nombre",
+        ]
+        read_only_fields = ["id", "cliente", "estado", "created_at"]
+
+    def validate_especialidad(self, value):
+        if not value.activa:
+            raise serializers.ValidationError("La especialidad no está activa.")
+        return value
+
+    def validate_zona(self, value):
+        if not value.activa:
+            raise serializers.ValidationError("La zona no está activa.")
+        return value
+
+    def validate_fecha_preferida(self, value):
+        if value and value < timezone.localdate():
+            raise serializers.ValidationError("La fecha preferida no puede ser pasada.")
+        return value
+
+    def validate(self, attrs):
+        request = self.context.get("request")
+        user = getattr(request, "user", None) if request else None
+
+        if self.instance is None:
+            solicitud = Solicitud(cliente=user, **{k: v for k, v in attrs.items() if k != "imagenes"})
+        else:
+            solicitud = self.instance
+            for attr, val in attrs.items():
+                setattr(solicitud, attr, val)
+
+        try:
+            solicitud.full_clean()
+        except DjangoValidationError as exc:
+            raise a_error_drf(exc)
+
+        return attrs
+
+class PropuestaSerializer(serializers.ModelSerializer):
+    tecnico_nombre = serializers.ReadOnlyField(source="tecnico.get_full_name")
+    tecnico_username = serializers.ReadOnlyField(source="tecnico.username")
+
+    # Datos de la solicitud, para que el técnico distinga sus propuestas.
+    solicitud_titulo = serializers.ReadOnlyField(source="solicitud.titulo")
+    solicitud_estado = serializers.ReadOnlyField(source="solicitud.estado")
+    solicitud_direccion = serializers.ReadOnlyField(source="solicitud.direccion")
+    solicitud_es_urgente = serializers.ReadOnlyField(source="solicitud.es_urgente")
+    especialidad_nombre = serializers.ReadOnlyField(
+        source="solicitud.especialidad.nombre"
+    )
+    zona_nombre = serializers.ReadOnlyField(source="solicitud.zona.nombre")
+
+    class Meta:
+        model = Propuesta
+        fields = [
+            "id",
+            "solicitud",
+            "solicitud_titulo",
+            "solicitud_estado",
+            "solicitud_direccion",
+            "solicitud_es_urgente",
+            "especialidad_nombre",
+            "zona_nombre",
+            "tecnico",
+            "tecnico_nombre",
+            "tecnico_username",
+            "precio",
+            "descripcion_solucion",
+            "fecha_disponible",
+            "estado",
+            "created_at",
+        ]
+        read_only_fields = [
+            "id",
+            "solicitud",
+            "tecnico",
+            "estado",
+            "created_at",
+        ]
+
+    def validate(self, attrs):
+        # Inyectamos técnico y solicitud desde el contexto si están presentes
+        tecnico = self.context.get("tecnico") or getattr(self.instance, "tecnico", None)
+        solicitud = self.context.get("solicitud") or getattr(self.instance, "solicitud", None)
+
+        instancia_temp = Propuesta(
+            solicitud=solicitud,
+            tecnico=tecnico,
+            **attrs
+        )
+        try:
+            instancia_temp.clean()
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(
+                exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+            )
+
+        return attrs
+
+    def create(self, validated_data):
+        validated_data["tecnico"] = self.context["tecnico"]
+        validated_data["solicitud"] = self.context["solicitud"]
+        return super().create(validated_data)
